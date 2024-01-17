@@ -31,24 +31,29 @@ pub fn spawn_character(
     // Spawn Bassist sprite at the center of the screen with a high Z-index
     commands.spawn((SpriteBundle {
         texture: character_texture,
-        transform: Transform::from_xyz(0.0, 0.0, 100.0),
+        transform: Transform::from_xyz(500.0, 0.0, 100.0),
         ..default()
     },
     Bassist::default()
     ));
 }
 
-const PLAYER_SPEED: f32 = 500.0;
+const PLAYER_SPEED: f32 = 1.0;
 
-pub fn player_move(
+pub fn player_movement(
         mut character_query: Query<(&mut Transform, &mut Bassist)>,
+        input: Res<Input<KeyCode>>,
         time: Res<Time>
 ) {
     for (mut transform, mut bassist) in character_query.iter_mut() {
-        match bassist.movement {
-            MoveState::PlatformMove => transform.translation += Vec3::new(300.0, 0.0, 0.0),
-            MoveState::JumpMove => transform.translation += Vec3::new(PLAYER_SPEED, 20.0, 0.0),
-            _ => panic!("!! Enum MoveState not set for Bassist in player_move query !!")
-        } 
+        if (input.just_pressed(KeyCode::X)) {
+            transform.translation += Vec3::new(30.0, 0.0, 0.0);
+        }
+
+        // match &bassist.movement {
+        //     MoveState::PlatformMove => transform.translation += Vec3::new(1.0, 0.0, 0.0),
+        //     MoveState::JumpMove => transform.translation += Vec3::new(PLAYER_SPEED, 20.0, 0.0),
+        //     _ => panic!("!! Enum MoveState not set for Bassist in player_move query !!")
+        // } 
     }
 }
