@@ -1,7 +1,6 @@
 use bevy::prelude::*;
-use bevy::ui::*;
 
-pub fn draw_menu_ui(
+pub fn setup_load_screen(
     mut commands: Commands
 ) {
     commands.spawn(NodeBundle {

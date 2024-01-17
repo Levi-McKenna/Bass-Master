@@ -19,8 +19,6 @@ pub fn fit_camera_to_level(
                 let level = &ldtk_level.level;
                 let bassist_transform = bassist_query.single();
 
-                // TODO: Fix the camera juggling between beginning and end when bassist is out of
-                // bounds
                 if (camera_transform.translation.x + VIEWPORT_X >= level.px_wid as f32) {
                     camera_transform.translation = Vec3::new(level.px_wid as f32 - VIEWPORT_X, level.px_hei as f32 / 2.0, 0.0);
                 } else {
