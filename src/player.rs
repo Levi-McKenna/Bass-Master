@@ -38,6 +38,15 @@ pub fn spawn_character(
     ));
 }
 
+pub fn despawn_character(
+    mut commands: Commands,
+    player_query: Query<Entity, With<Bassist>> 
+) {
+    if let Ok(player) = player_query.get_single() {
+        commands.entity(player).despawn();
+    }
+}
+
 const PLAYER_SPEED: f32 = 1.0;
 
 pub fn player_movement(
