@@ -21,6 +21,7 @@ pub enum GameState {
     #[default]
     MainMenu,
     InGame,
+    FinishedGame,
     Paused,
     LoadScreen,
 }
@@ -28,6 +29,8 @@ pub enum GameState {
 #[derive(Component)]
 pub struct WorldCamera;
 
+#[derive(Resource)]
+pub struct LevelFinished(bool);
 
 fn setup(mut commands: Commands) {
     commands.spawn((
@@ -50,15 +53,13 @@ fn main() {
         .insert_resource(LevelSelection::Index(0))
         // main menu state management
         .add_state::<GameState>()
-        .add_systems(OnEnter(GameState::MainMenu), (draw_menu_ui, spawn_menu_world))
+        .insert_resource(LevelFinished(false))
+        .add_systems(OnEnter(GameState::MainMenu), (draw_menu_ui, spawn_menu_world, fit_camera_to_level))
         .add_systems(OnExit(GameState::MainMenu), despawn_world)
         .add_systems(OnEnter(GameState::InGame), (spawn_character, load_world))
         .add_systems(OnExit(GameState::InGame), (despawn_world, despawn_character))
-        // TODO: Manage the load screen state for when all setup is finished. (Possibly insert a
-        // resource that is a certain value when all are finished)
-/*         .add_systems(OnEnter(GameState::LoadScreen), (setup_load_screen, spawn_character, load_world)) */
-        .add_systems(Update, (player_movement, fit_camera_to_level_player).run_if(in_state(GameState::InGame)))
+        .add_systems(Update, (player_movement, handle_camera_translations, fit_camera_to_level).run_if(in_state(GameState::InGame)))
         .add_systems(Startup, (setup))
-        .add_systems(Update, state_inputs)
+        .add_systems(Update, (state_inputs))
         .run();
 }
