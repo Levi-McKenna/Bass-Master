@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use crate::{WorldCamera, LevelFinished};
+use crate::{WorldCamera, LevelState};
 
 // States to control the direction the player moves when jumping
 #[derive(Default)]
@@ -32,7 +32,7 @@ pub fn spawn_character(
     // Spawn Bassist sprite at the center of the screen with a high Z-index
     commands.spawn((SpriteBundle {
         texture: character_texture,
-        transform: Transform::from_xyz(500.0, 256.0 / 2.0, 100.0),
+        transform: Transform::from_xyz(0.0, 256.0 / 2.0, 100.0),
         ..default()
     },
     Bassist::default()
@@ -54,8 +54,8 @@ pub fn player_movement(
         mut character_query: Query<(&mut Transform, &mut Bassist)>,
         mut camera_query: Query<&mut Transform, (With<WorldCamera>, Without<Bassist>)>,
         input: Res<Input<KeyCode>>,
-        finished: Res<LevelFinished>,
-        time: Res<Time>
+        level_state: Res<State<LevelState>>,
+        time: Res<Time>,
 ) {
     for (mut character_transform, mut bassist) in character_query.iter_mut() {
         
@@ -64,11 +64,11 @@ pub fn player_movement(
             if input.just_pressed(KeyCode::X) {
                 character_transform.translation.x += 30.0;
             }
-            if !finished.0 {
+            // if the camera translations can start, translate
+            if level_state.get() == &LevelState::Playing {
                 camera_transform.translation.x = character_transform.translation.x;
             }
         }
-
         // match &bassist.movement {
         //     MoveState::PlatformMove => transform.translation += Vec3::new(1.0, 0.0, 0.0),
         //     MoveState::JumpMove => transform.translation += Vec3::new(PLAYER_SPEED, 20.0, 0.0),
