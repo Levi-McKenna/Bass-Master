@@ -1,6 +1,5 @@
 use bevy::prelude::*;
-use bevy_ecs_ldtk::prelude::*;
-use crate::{LevelState, GameState};
+use crate::GameState;
 
 #[derive(Component)]
 pub struct LoadScreenNodeBundle;

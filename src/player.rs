@@ -40,7 +40,8 @@ pub fn spawn_character(
     // Spawn Bassist sprite at the center of the screen with a high Z-index
     commands.spawn((SpriteSheetBundle {
         texture_atlas: character_assets.sprite.clone(),
-        transform: Transform::from_xyz(0.0, 256.0 / 2.0, 100.0),
+        // set out of bounds for level loading
+        transform: Transform::from_xyz(-1000.0, 256.0 / 2.0, 100.0),
         sprite: TextureAtlasSprite {
             custom_size: Some(Vec2::splat(60.0)),
             anchor: Anchor::Center,
@@ -62,6 +63,13 @@ pub fn despawn_character(
     }
 }
 
+pub fn set_player_bounds(
+    mut character_query: Query<(&mut Transform), With<Bassist>>
+) {
+    let mut character_transform = character_query.single_mut();
+    character_transform.translation.x = 0.0;
+}
+
 const PLAYER_SPEED: f32 = 1.0;
 
 pub fn player_movement(
@@ -75,8 +83,10 @@ pub fn player_movement(
         
         // translate character and camera
         if let Ok(mut camera_transform) = camera_query.get_single_mut() {
+            if time.delta_seconds() > 0.1 {
+                character_transform.translation.x += PLAYER_SPEED * time.delta().as_secs_f32();
+            }
             if input.just_pressed(KeyCode::X) {
-                character_transform.translation.x += 30.0;
             }
             // if the camera translations can start, translate
             if level_state.get() == &LevelState::Playing {

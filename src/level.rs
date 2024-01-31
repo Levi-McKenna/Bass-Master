@@ -72,14 +72,14 @@ pub fn fit_camera_to_window (
 
 pub fn handle_level_camera_translations(
     mut camera_query: Query<&mut Transform, With<WorldCamera>>,
-    mut character_query: Query<&Transform, (With<Bassist>, Without<WorldCamera>)>,
-    mut level_query: Query<(&Handle<LdtkLevel>), (Without<Bassist>, Without<WorldCamera>)>,
+    character_query: Query<&Transform, (With<Bassist>, Without<WorldCamera>)>,
+    level_query: Query<(&Handle<LdtkLevel>), (Without<Bassist>, Without<WorldCamera>)>,
     window_query: Query<&Window>,
     ldtk_levels: Res<Assets<LdtkLevel>>,
     mut change_level_state: ResMut<NextState<LevelState>>,
     level_state: Res<State<LevelState>>,
 ) {
-    for (level_handle) in level_query.iter(){
+    for level_handle in level_query.iter(){
         if let Some(ldtk_level) = ldtk_levels.get(level_handle) {
             let window = window_query.single();
             let level = &ldtk_level.level;
@@ -91,7 +91,7 @@ pub fn handle_level_camera_translations(
                 camera_transform.translation.x = window.width() as f32 / 2.0
             }
             // TODO: turn the start resource into a more viable state
-            match (level_state.get()) {
+            match level_state.get() {
                 // if character reaches start of level
                 &LevelState::Introduction if character_transform.translation.x >= (camera_transform.translation.x) => 
                     change_level_state.set(LevelState::Playing),

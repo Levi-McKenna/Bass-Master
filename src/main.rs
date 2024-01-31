@@ -62,20 +62,21 @@ fn main() {
         // Asset Collections go here 
         .add_loading_state(
             LoadingState::new(GameState::AssetLoading)
-                .continue_to_state(GameState::InGame)
+                .continue_to_state(GameState::AssetsLoaded)
         )
         .add_collection_to_loading_state::<_, CharacterAssets>(GameState::AssetLoading)
         .add_collection_to_loading_state::<_, LevelAssets>(GameState::AssetLoading)
         .add_systems(OnEnter(GameState::AssetLoading), (spawn_load_screen))
         .add_systems(OnExit(GameState::AssetLoading), (spawn_character, load_world, fit_camera_to_window, handle_level_camera_translations))
-        /* .add_systems(Update, (fit_camera_to_window, handle_level_camera_translations).run_if(in_state(GameState::AssetsLoaded)))
-        .add_systems(OnExit(GameState::AssetsLoaded), (exit_load_screen)) */
+        .add_systems(OnEnter(GameState::AssetsLoaded), (exit_load_screen))
+        // all systems for pre-level start
+        .add_systems(OnExit(GameState::AssetsLoaded), (set_player_bounds))
         // MainMenu systems
-        .add_systems(OnEnter(GameState::MainMenu), (exit_load_screen, level_start, spawn_menu_world))
+        .add_systems(OnEnter(GameState::MainMenu), (level_start, spawn_menu_world))
         .add_systems(Update, (fit_camera_to_window, handle_level_camera_translations).run_if(in_state(GameState::MainMenu)))
         .add_systems(OnExit(GameState::MainMenu), (despawn_character, despawn_world))
         // InGame systems
-        .add_systems(OnEnter(GameState::InGame), (exit_load_screen, level_start))
+        .add_systems(OnEnter(GameState::InGame), (level_start))
         .add_systems(Update, (handle_level_camera_translations, player_movement, fit_camera_to_window).run_if(in_state(GameState::InGame)))
         .add_systems(OnExit(GameState::InGame), (despawn_world, despawn_character))
         .add_systems(Startup, (setup))
