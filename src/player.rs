@@ -1,4 +1,6 @@
 use bevy::prelude::*;
+use bevy_asset_loader::asset_collection::AssetCollection;
+use bevy::sprite::Anchor;
 use crate::{WorldCamera, LevelState};
 
 // States to control the direction the player moves when jumping
@@ -24,15 +26,27 @@ pub struct Bassist {
     inverse: Inverse
 }
 
+#[derive(AssetCollection, Resource)]
+pub struct CharacterAssets {
+    #[asset(texture_atlas(tile_size_x = 64., tile_size_y = 64., columns = 8, rows = 1, padding_x = 0., padding_y = 0., offset_x = 6., offset_y = 6.))]
+    #[asset(path = "textures/bass_master_sprite.png")]
+    sprite: Handle<TextureAtlas>,
+}
+
 pub fn spawn_character(
         mut commands: Commands,
-        asset_server: Res<AssetServer>
+        character_assets: Res<CharacterAssets>,
 ) {
-    let character_texture = asset_server.load("textures/bass_master_sprite.png");
     // Spawn Bassist sprite at the center of the screen with a high Z-index
-    commands.spawn((SpriteBundle {
-        texture: character_texture,
+    commands.spawn((SpriteSheetBundle {
+        texture_atlas: character_assets.sprite.clone(),
         transform: Transform::from_xyz(0.0, 256.0 / 2.0, 100.0),
+        sprite: TextureAtlasSprite {
+            custom_size: Some(Vec2::splat(60.0)),
+            anchor: Anchor::Center,
+            color: Color::PURPLE,
+            ..default()
+        },
         ..default()
     },
     Bassist::default()
@@ -51,7 +65,7 @@ pub fn despawn_character(
 const PLAYER_SPEED: f32 = 1.0;
 
 pub fn player_movement(
-        mut character_query: Query<(&mut Transform, &mut Bassist)>,
+        mut character_query: Query<(&mut Transform, &mut Bassist), Without<WorldCamera>>,
         mut camera_query: Query<&mut Transform, (With<WorldCamera>, Without<Bassist>)>,
         input: Res<Input<KeyCode>>,
         level_state: Res<State<LevelState>>,

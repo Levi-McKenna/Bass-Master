@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_asset_loader::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use crate::{WorldCamera, Bassist, GameState};
 
@@ -15,22 +16,24 @@ pub enum LevelState {
     Ending
 }
 
+#[derive(AssetCollection, Resource)]
+pub struct LevelAssets {
+    #[asset(path = "levels/built_in/Bass_Master_Level_Test.ldtk")]
+    handle: Handle<LdtkAsset>
+}
+
 pub fn load_world(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut change_game_state: ResMut<NextState<GameState>>
+    level_collection: Res<LevelAssets>,
 ) {
-    let mut level_handle: Handle<LdtkAsset> = asset_server.load("levels/built_in/Bass_Master_Level_Test.ldtk");
     commands.spawn((LdtkWorldBundle {
-        ldtk_handle: level_handle,
+        ldtk_handle: level_collection.handle.clone(),
         ..default()
     },
         CurrentLevel {}
     ));
-    change_game_state.set(GameState::InGame);
 }
 
-// TODO: FIGURE OUT WHAT THE FUCK TO DO WITH THIS PIECE OF SHIT CRATE FOR LDTK
 pub fn despawn_world(
     mut commands: Commands,
     level_query: Query<Entity, (With<Handle<LdtkAsset>>)>,
@@ -84,7 +87,7 @@ pub fn handle_level_camera_translations(
             let character_transform = character_query.single();
 
             // if camera is out of bounds left of the level
-            if (camera_transform.translation.x - window.width() as f32) <= 0.0 { 
+            if (camera_transform.translation.x - window.width() as f32 / 2.0) <= 0.0 { 
                 camera_transform.translation.x = window.width() as f32 / 2.0
             }
             // TODO: turn the start resource into a more viable state
@@ -98,7 +101,7 @@ pub fn handle_level_camera_translations(
                 &LevelState::Ending => 
                     camera_transform.translation.x = level.px_wid as f32 - window.width() as f32 / 2.0,
                 // if nuthin
-                &_ => println!("{:?}", level_state.get()),
+                &_ => (),
             }
             // If world will be out of bounds in either direction before and after the bassist
             // is off or on screen we set the x translation accordingly 
@@ -107,3 +110,11 @@ pub fn handle_level_camera_translations(
     
 } 
 
+pub fn level_start(
+    game_state: Res<State<GameState>>,
+    mut change_level_state: ResMut<NextState<LevelState>>,
+) {
+    if game_state.get() == &GameState::InGame {
+        change_level_state.set(LevelState::Introduction);
+    }
+}

@@ -10,6 +10,6 @@ pub fn state_inputs(
     }
 
     if (input.just_pressed(KeyCode::S)) {
-        game_state.set(GameState::LoadScreen);
+        game_state.set(GameState::AssetLoading);
     }
 }
