@@ -10,7 +10,7 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy_asset_loader::prelude::*;
 use bevy::render::RenderPlugin;
 use bevy::render::settings::WgpuSettings;
- use bevy::render::settings::Backends;
+use bevy::render::settings::Backends;
 use player::*;
 use level::*;
 use menu::*;
