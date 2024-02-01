@@ -43,6 +43,7 @@ fn setup(mut commands: Commands) {
 }
 fn main() {
     App::new()
+<<<<<<< HEAD
         .add_plugins(DefaultPlugins.set(RenderPlugin {
             wgpu_settings: WgpuSettings {
                 backends: Some(Backends::VULKAN),
