@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_asset_loader::asset_collection::AssetCollection;
 use bevy::sprite::Anchor;
-use crate::{WorldCamera, LevelState};
+use crate::{WorldCamera, LevelState, MovementTimer};
 
 // States to control the direction the player moves when jumping
 #[derive(Default)]
@@ -78,20 +78,16 @@ pub fn player_movement(
         input: Res<Input<KeyCode>>,
         level_state: Res<State<LevelState>>,
         time: Res<Time>,
+        mut timer: ResMut<MovementTimer>
 ) {
     for (mut character_transform, mut bassist) in character_query.iter_mut() {
         
         // translate character and camera
         if let Ok(mut camera_transform) = camera_query.get_single_mut() {
-            if time.delta_seconds() > 0.1 {
-                character_transform.translation.x += PLAYER_SPEED * time.delta().as_secs_f32();
+            if timer.0.just_finished() {
+                character_transform.translation.x += 10.0;
             }
-            if input.just_pressed(KeyCode::X) {
-            }
-            // if the camera translations can start, translate
-            if level_state.get() == &LevelState::Playing {
-                camera_transform.translation.x = character_transform.translation.x;
-            }
+            timer.0.tick(time.delta());
         }
         // match &bassist.movement {
         //     MoveState::PlatformMove => transform.translation += Vec3::new(1.0, 0.0, 0.0),
