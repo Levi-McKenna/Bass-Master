@@ -9,7 +9,7 @@ pub fn spawn_load_screen(
 ) {
     commands.spawn((
         NodeBundle {
-            background_color: BackgroundColor(Color::PURPLE),
+            background_color: BackgroundColor(Color::GRAY),
             style: Style {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
