@@ -1,4 +1,3 @@
-// TODO: Manage load screen states
 mod player;
 mod level;
 mod input;
