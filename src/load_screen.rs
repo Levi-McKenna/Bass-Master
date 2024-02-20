@@ -1,5 +1,6 @@
 use bevy::prelude::*;
-use crate::GameState;
+use bevy_ecs_ldtk::prelude::*;
+use crate::{GameState, CurrentLevel};
 
 #[derive(Component)]
 pub struct LoadScreenNodeBundle;
@@ -38,15 +39,28 @@ pub fn spawn_load_screen(
     });
 }
 
+// honestly a little verbose and not needed but i guess it's nice to have just in case
 pub fn exit_load_screen(
     mut commands: Commands,
     load_screen_query: Query<Entity, With<LoadScreenNodeBundle>>,
     mut change_game_state: ResMut<NextState<GameState>>,
-    time: Res<Time>,
+    ldtk_levels: Res<Assets<LdtkLevel>>,
+    level_query: Query<&Handle<LdtkLevel>>,
+    mut level_event: EventReader<LevelEvent>,
 ) {
-    load_screen_query.for_each(|load_screen_node_bundles| {
-        commands.entity(load_screen_node_bundles).despawn_recursive();
-    });
-    change_game_state.set(GameState::InGame);
+    for level_handle in level_query.iter() {
+        // get level iid
+        let level = ldtk_levels.get(level_handle);
+        let level_iid = &level.expect("No Level With An IID").level.iid;
+        // check for if level has spawned
+        for event in level_event.iter() {
+            if event == &LevelEvent::Transformed(level_iid.to_string()) {
+                load_screen_query.for_each(|load_screen_node_bundles| {
+                    commands.entity(load_screen_node_bundles).despawn_recursive();
+                });
+                change_game_state.set(GameState::InGame);
+            }
+        }
+    }
 }
 

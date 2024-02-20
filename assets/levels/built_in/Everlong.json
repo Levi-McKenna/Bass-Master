@@ -1,0 +1,848 @@
+{
+  "BPM": 158,
+  "Duration": 21.0,
+  "Beats": 4,
+  "NoteValue": 4,
+  "Notes": [
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "E",
+      "Fret": 0,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 5,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    },
+    {
+      "String": "A",
+      "Fret": 2,
+      "Note": 8
+    }
+  ]
+}

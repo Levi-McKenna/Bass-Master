@@ -1,0 +1,114 @@
+({
+  "note.half": TextureAtlas (
+    path: "textures/Bass_Tablature/Half-Note.png",
+    tile_size_x: 64.,
+    tile_size_y: 64.,
+    columns: 64,
+    rows: 64
+  ),
+  "note.quarter": TextureAtlas (
+    path: "textures/Bass_Tablature/Quarter-Note.png",
+    tile_size_x: 64.,
+    tile_size_y: 64.,
+    columns: 64,
+    rows: 64
+  ),
+  "note.eighth": TextureAtlas (
+    path: "textures/Bass_Tablature/Eighth-Note.png",
+    tile_size_x: 64.,
+    tile_size_y: 64.,
+    columns: 64,
+    rows: 64
+  ),
+  "note.sixteenth": TextureAtlas (
+    path: "textures/Bass_Tablature/Sixteenth-Note.png",
+    tile_size_x: 64.,
+    tile_size_y: 64.,
+    columns: 64,
+    rows: 64
+  ),
+  "note.thirty-second": TextureAtlas (
+    path: "textures/Bass_Tablature/Thirty-Second-Note.png",
+    tile_size_x: 64.,
+    tile_size_y: 64.,
+    columns: 64,
+    rows: 64
+  ),
+  "fret.0": TextureAtlas (
+    path: "textures/Bass_Tablature/Fret-0.png",
+    tile_size_x: 16.,
+    tile_size_y: 16.,
+    columns: 16,
+    rows: 16
+  ),
+  "fret.1": TextureAtlas (
+    path: "textures/Bass_Tablature/Fret-1.png",
+    tile_size_x: 16.,
+    tile_size_y: 16.,
+    columns: 16,
+    rows: 16
+  ),
+  "fret.2": TextureAtlas (
+    path: "textures/Bass_Tablature/Fret-2.png",
+    tile_size_x: 16.,
+    tile_size_y: 16.,
+    columns: 16,
+    rows: 16
+  ),
+  "fret.3": TextureAtlas (
+    path: "textures/Bass_Tablature/Fret-3.png",
+    tile_size_x: 16.,
+    tile_size_y: 16.,
+    columns: 16,
+    rows: 16
+  ),
+  "fret.4": TextureAtlas (
+    path: "textures/Bass_Tablature/Fret-4.png",
+    tile_size_x: 16.,
+    tile_size_y: 16.,
+    columns: 16,
+    rows: 16
+  ),
+  "fret.5": TextureAtlas (
+    path: "textures/Bass_Tablature/Fret-5.png",
+    tile_size_x: 16.,
+    tile_size_y: 16.,
+    columns: 16,
+    rows: 16
+  ),
+  "fret.6": TextureAtlas (
+    path: "textures/Bass_Tablature/Fret-6.png",
+    tile_size_x: 16.,
+    tile_size_y: 16.,
+    columns: 16,
+    rows: 16
+  ),
+  "fret.7": TextureAtlas (
+    path: "textures/Bass_Tablature/Fret-7.png",
+    tile_size_x: 16.,
+    tile_size_y: 16.,
+    columns: 16,
+    rows: 16
+  ),
+  "fret.8": TextureAtlas (
+    path: "textures/Bass_Tablature/Fret-8.png",
+    tile_size_x: 16.,
+    tile_size_y: 16.,
+    columns: 16,
+    rows: 16
+  ),
+  "fret.9": TextureAtlas (
+    path: "textures/Bass_Tablature/Fret-9.png",
+    tile_size_x: 16.,
+    tile_size_y: 16.,
+    columns: 16,
+    rows: 16
+  ),
+  "fret.10": TextureAtlas (
+    path: "textures/Bass_Tablature/Fret-10.png",
+    tile_size_x: 16.,
+    tile_size_y: 16.,
+    columns: 16,
+    rows: 16
+  ),
+})
