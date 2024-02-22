@@ -10,7 +10,7 @@ pub fn spawn_load_screen(
 ) {
     commands.spawn((
         NodeBundle {
-            background_color: BackgroundColor(Color::GRAY),
+            background_color: BackgroundColor(Color::rgba(0., 0.011764705882352941, 0.18823529411764706, 1.)),
             style: Style {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
@@ -28,6 +28,7 @@ pub fn spawn_load_screen(
                     "Loading Assets...",
                     TextStyle {
                         font_size: 60.0,
+                        color: Color::rgba(0., 0.9098039215686274, 1., 1.),
                         ..default()
                     }
                 ),

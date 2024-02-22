@@ -69,6 +69,10 @@ fn main() {
         .add_state::<GameState>()
         .add_state::<LevelState>()
         .add_state::<SongState>()
+        .add_state::<NoteState>()
+        // Ldtk Entities
+        .register_ldtk_entity::<JumpBundle>("Jump")
+        .register_ldtk_entity::<JumpBundle>("JumpReverse")
         // Asset loading state for the main menu
         .add_loading_state(
             LoadingState::new(GameState::MenuAssetLoading)
@@ -102,9 +106,9 @@ fn main() {
         .add_systems(Update, (fit_camera_to_window, handle_level_camera_translations).run_if(in_state(GameState::MainMenu)))
         .add_systems(OnExit(GameState::MainMenu), (despawn_character, despawn_world))
         // InGame systems
-        .add_systems(OnEnter(GameState::InGame), (fit_camera_to_window, level_start))
+        .add_systems(OnEnter(GameState::InGame), (insert_beat_coords, fit_camera_to_window, level_start))
         .add_systems(Update, (player_movement, translate_bass_notes).run_if(in_state(GameState::InGame)))
-        .add_systems(Update, (manage_level_states, handle_level_camera_translations, update_time).run_if(in_state(GameState::InGame)))
+        .add_systems(Update, (manage_note_state,manage_level_states, handle_level_camera_translations, update_time).run_if(in_state(GameState::InGame)))
         .add_systems(OnExit(GameState::InGame), (despawn_world, despawn_character))
         // SongState Introduction
         .add_systems(Startup, (pause_level_clock, setup))

@@ -8,9 +8,15 @@ use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
-use crate::{WorldCamera, LevelState};
+use crate::{WorldCamera, LevelState, CurrentJumpCoord, JumpCoords};
 
-// TODO: use serde json to read all json of file and then spawn the notes
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
+pub enum NoteState {
+    #[default]
+    Rest,
+    Playing,
+}
+
 // identifier structs
 #[derive(Component)]
 pub struct BassUI;
@@ -276,6 +282,7 @@ pub fn translate_bass_notes(
     pick_query: Query<&Transform, (With<BassPick>, Without<BassNotes>)>,
     mut audio_query: Query<&AudioSink>,
     tablature: Res<MusicJson>,
+    mut change_note_state: ResMut<NextState<NoteState>>,
     time: Res<Time>,
 ) {
     let pick_transform = pick_query.single();
@@ -297,7 +304,7 @@ pub fn translate_bass_notes(
 
             let mut speed_scale: f32;
             if bass_note_transform.translation.x <= pick_transform.translation.x ||
-            bass_note_transform.translation.x + NOTE_OFFSET <= pick_transform.translation.x {
+            bass_note_transform.translation.x - NOTE_OFFSET <= pick_transform.translation.x {
                 speed_scale = note_speed_manipulation(note.note, tablature.BPM, tablature.NoteValue);
             } else {
                 speed_scale = note_speed_manipulation(tablature.NoteValue, tablature.BPM, tablature.NoteValue);
@@ -328,4 +335,26 @@ fn parse_bass_json<P: AsRef<Path>>(path: P) -> Result<MusicJson, Box<dyn Error>>
     let tablature = serde_json::from_reader(reader)?;
 
     Ok(tablature)
+}
+
+// This is for managing the note state that controls the type of player movement in player.rs.
+pub fn manage_note_state(
+    bass_note_query: Query<&Transform, (With<BassNotes>, Without<BassPick>)>,
+    pick_query: Query<&Transform, (With<BassPick>, Without<BassNotes>)>,
+    mut change_note_state: ResMut<NextState<NoteState>>,
+    note_state: Res<State<NoteState>>,
+    mut grid_coord_index: ResMut<CurrentJumpCoord>,
+    grid_coords: Res<JumpCoords>,
+) {
+    let pick_transform = pick_query.single();
+
+    for note_transform in bass_note_query.iter() {
+
+        if (note_transform.translation.x <= pick_transform.translation.x && note_transform.translation.x >= pick_transform.translation.x - 2.) &&
+            grid_coord_index.0 < grid_coords.0.len() && note_state.get() != &NoteState::Playing{
+            change_note_state.set(NoteState::Playing);
+        } else if note_state.get() != &NoteState::Rest{
+            change_note_state.set(NoteState::Rest);
+        }
+    }
 }
