@@ -15,6 +15,8 @@ use bevy::render::settings::WgpuSettings;
 use bevy::render::settings::Backends;
 use belly::prelude::*;
 use bevy::window::WindowMode;
+use bevy::winit::WinitWindows;
+use winit::window::Icon;
 use player::*;
 use level::*;
 use menu::*;
@@ -31,8 +33,8 @@ pub enum GameState {
     InGame,
     Paused,
     // TODO: Switch default to MenuAssetLoading when the menu assets are ready to be implemented
-    MenuAssetLoading,
     #[default]
+    MenuAssetLoading,
     AssetLoading,
     AssetsLoaded,
 }
@@ -47,6 +49,24 @@ fn setup(mut commands: Commands) {
         },
         WorldCamera
     ));
+}
+
+fn set_window_icon(
+    windows: NonSend<WinitWindows>,
+) {
+    let (icon_rgba, icon_width, icon_height) = {
+        let image = image::open("./assets/textures/Bass-Master-Icon.png")
+            .expect("Failed to open icon path")
+            .into_rgba8();
+        let (width, height) = image.dimensions();
+        let rgba = image.into_raw();
+        (rgba, width, height)
+    };
+    let icon = Icon::from_rgba(icon_rgba, icon_width, icon_height).unwrap();
+
+    for window in windows.windows.values() {
+        window.set_window_icon(Some(icon.clone()));
+    }
 }
 
 fn main() {
@@ -78,6 +98,7 @@ fn main() {
             LoadingState::new(GameState::MenuAssetLoading)
                 .continue_to_state(GameState::MainMenu)
         )
+        .add_systems(OnEnter(GameState::MenuAssetLoading), draw_menu_ui)
         // Asset loading state that continues to pre-level systems
         .add_loading_state(
             LoadingState::new(GameState::AssetLoading)
@@ -102,16 +123,16 @@ fn main() {
         .add_systems(Update, exit_load_screen.run_if(in_state(GameState::AssetsLoaded)))
         .add_systems(OnExit(GameState::AssetsLoaded), (pause_song_time, set_player_bounds, spawn_bass_notes))
         // MainMenu systems
-        .add_systems(OnEnter(GameState::MainMenu), (level_start, spawn_menu_world))
+        /* .add_systems(OnEnter(GameState::MainMenu), (level_start, spawn_menu_world))
         .add_systems(Update, (fit_camera_to_window, handle_level_camera_translations).run_if(in_state(GameState::MainMenu)))
-        .add_systems(OnExit(GameState::MainMenu), (despawn_character, despawn_world))
+        .add_systems(OnExit(GameState::MainMenu), (despawn_character, despawn_world)) */
         // InGame systems
         .add_systems(OnEnter(GameState::InGame), (insert_beat_coords, fit_camera_to_window, level_start))
         .add_systems(Update, (player_movement, translate_bass_notes).run_if(in_state(GameState::InGame)))
         .add_systems(Update, (manage_note_state,manage_level_states, handle_level_camera_translations, update_time).run_if(in_state(GameState::InGame)))
         .add_systems(OnExit(GameState::InGame), (despawn_world, despawn_character))
         // SongState Introduction
-        .add_systems(Startup, (pause_level_clock, setup))
+        .add_systems(Startup, (set_window_icon, pause_level_clock, setup))
         .add_systems(Update, (state_inputs))
         .run();
 }
