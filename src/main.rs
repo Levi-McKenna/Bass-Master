@@ -98,7 +98,7 @@ fn main() {
             LoadingState::new(GameState::MenuAssetLoading)
                 .continue_to_state(GameState::MainMenu)
         )
-        .add_systems(OnEnter(GameState::MenuAssetLoading), draw_menu_ui)
+        .add_systems(OnEnter(GameState::MenuAssetLoading), (draw_menu_ui, find_world_files))
         // Asset loading state that continues to pre-level systems
         .add_loading_state(
             LoadingState::new(GameState::AssetLoading)
