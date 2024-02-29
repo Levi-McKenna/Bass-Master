@@ -1,30 +1,41 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
+use bevy::app::AppExit;
 use belly::prelude::*;
-use std::{io, fs};
+use std::fs;
+use std::error::Error;
 use std::path::Path;
 
-pub fn spawn_menu_world(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-) {
-    commands.spawn(LdtkWorldBundle {
-        ldtk_handle: asset_server.load("levels/built_in/Main_Menu.ldtk"),
-        ..default()
-    });
-}
+// QuitEvent used in later function, close_event.
+#[derive(Event)]
+pub struct QuitEvent;
 
-pub fn find_world_files (
-    mut commands: Commands,
-) {
+// WorldEvent used to keep track of what world the player selects and is used in function
+// insert_world_dir in src/levels.rs.
+#[derive(Event)]
+pub struct WorldEvent(pub String);
+
+// Find all world files and strip them of their ./assets prefix and return with a Result.
+fn find_world_files() -> Result<Vec<String>, Box<dyn Error>> {
     let level_path = "./assets/levels/built_in/";
+    let mut levels: Vec<String> = Vec::new();
 
-    for entry in fs::read_dir(Path::new(level_path)).expect("for loop entry error") {
-        let entry  = entry.expect("entry error");
-        println!("{:?}", entry.path());
+    for entry in fs::read_dir(Path::new(level_path))? {
+        let entry = entry?.path();
+
+        // strip /assets for easier file finding
+        let entry = entry.as_path();
+        if entry.extension().is_some_and(|extension| extension == "ldtk") {
+            let entry = entry.strip_prefix("./assets")?;
+            println!("{:?}", entry);
+            levels.push(entry.to_str().unwrap().to_string());
+        }
     }
+
+    Ok(levels)
 }
 
+// Toggle between presenting options to levels.
 fn toggle_play_menu(
     ctx: &mut EventContext<impl Event>,
 ) {
@@ -32,7 +43,26 @@ fn toggle_play_menu(
     ctx.select(".play-wrapper").toggle_class("hidden");
 }
 
-pub fn draw_menu_ui(
+// If an event from UI is sent to quit the game, then send the event for bevy to read and quit the
+// game.
+pub fn close_event(
+    mut exit: EventWriter<AppExit>,
+    mut quit_event: EventReader<QuitEvent>,
+) {
+    for quit in quit_event.iter() {
+        exit.send(AppExit);
+    }
+}
+
+// Despawn the body from the struct, Elements, that Belly provides.
+pub fn despawn_ui(
+    mut elements: Elements,
+) {
+    elements.select("body").remove();
+}
+
+// Using Belly, create a main menu ui.
+pub fn draw_main_menu_ui(
     mut commands: Commands
 ) {
     // image spawns
@@ -40,6 +70,10 @@ pub fn draw_menu_ui(
     let play = commands.spawn_empty().id();
     let settings = commands.spawn_empty().id();
     let quit = commands.spawn_empty().id();
+    let exit = commands.spawn_empty().id();
+
+    // Fetch worlds
+    let worlds = find_world_files().unwrap();
 
     commands.add(StyleSheet::load("stylesheets/Bass.ess"));
     commands.add(eml! {
@@ -52,12 +86,15 @@ pub fn draw_menu_ui(
                 <button c:control>
                     <img {settings} c:image src="textures/Settings-Logo.png" mode="fit"/>
                 </button>
-                <button c:control>
+                <button c:control on:press=|ctx| ctx.send_event(QuitEvent)>
                     <img {quit} c:image src="textures/Quit-Logo.png" mode="fit"/>
                 </button>
             </div>
             <div class="play-wrapper hidden">
-                <span>"Penis"</span>
+                <button on:press=toggle_play_menu c:control><img {exit} src="textures/Back-Logo.png" c:image/></button>
+                <for world in=worlds>
+                    <button c:control on:press=move |ctx| ctx.send_event(WorldEvent(world.clone()))><strong>{world.clone()}</strong></button>
+                </for>
             </div>
         </body>
     });

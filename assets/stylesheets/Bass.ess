@@ -26,24 +26,32 @@ body {
   height: 80%;
 }
 
-button {
+.control {
   width: 50%;
   height: 20%;
 }
 
-button .image {
+.control strong {
   width: 100%;
   height: 100%;
   justify-content: center;
   align-items: center;
-}
+  color: white;
+  background-color: #023577;
+} 
 
 .control .image {
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
   background-color: #023577;
 }
 
 .play-wrapper {
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 100%;
 }

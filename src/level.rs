@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
-use crate::{WorldCamera, Bassist, GameState};
+use std::path::{Path, PathBuf};
+use crate::{WorldCamera, Bassist, GameState, WorldEvent};
 
 // Marker Component
 #[derive(Component)]
@@ -16,18 +17,39 @@ pub enum LevelState {
     Ending
 }
 
-#[derive(AssetCollection, Resource)]
-pub struct LevelAssets {
-    #[asset(path = "levels/built_in/Everlong_Snippet.ldtk")]
-    handle: Handle<LdtkAsset>
+#[derive(Resource)]
+pub struct LevelResource(pub PathBuf);
+
+pub fn insert_world_dir(
+    mut commands: Commands,
+    mut level_dir_events: EventReader<WorldEvent>,
+    mut change_game_state: ResMut<NextState<GameState>>,
+) {
+    for level_dir_event in level_dir_events.iter() {
+        let path = Path::new(&level_dir_event.0);
+        // coerce to PathBuf
+        let path_buf = path.to_path_buf();
+        commands.insert_resource(LevelResource(path_buf));
+        // switch state
+        change_game_state.set(GameState::AssetLoading);
+    }
 }
 
 pub fn load_world(
     mut commands: Commands,
-    level_collection: Res<LevelAssets>,
+    level_path: Res<LevelResource>,
+    asset_server: Res<AssetServer>,
+
 ) {
+    // set the path extension and coerce to str
+    // resource heavy clone as we don't want to be mutating the resource (note. I mean technically
+    // we could as .set_extension() does, in fact, replace the extension type)
+    let mut path = level_path.0.clone();
+    path.set_extension("ldtk");
+    let path_str = path.to_str().unwrap();
+
     commands.spawn((LdtkWorldBundle {
-        ldtk_handle: level_collection.handle.clone(),
+        ldtk_handle: asset_server.load(path_str),
         ..default()
     },
         CurrentLevel {}

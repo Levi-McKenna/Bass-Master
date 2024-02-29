@@ -85,6 +85,8 @@ fn main() {
         }))
         .add_plugins((LdtkPlugin, BellyPlugin))
         .insert_resource(LevelSelection::Index(0))
+        .add_event::<QuitEvent>()
+        .add_event::<WorldEvent>()
         // main menu state management
         .add_state::<GameState>()
         .add_state::<LevelState>()
@@ -98,7 +100,10 @@ fn main() {
             LoadingState::new(GameState::MenuAssetLoading)
                 .continue_to_state(GameState::MainMenu)
         )
-        .add_systems(OnEnter(GameState::MenuAssetLoading), (draw_menu_ui, find_world_files))
+        .add_systems(OnEnter(GameState::MenuAssetLoading), draw_main_menu_ui)
+        // MainMenu Systems
+        .add_systems(Update, (close_event, insert_world_dir).run_if(in_state(GameState::MainMenu)))
+        .add_systems(OnExit(GameState::MainMenu), despawn_ui)
         // Asset loading state that continues to pre-level systems
         .add_loading_state(
             LoadingState::new(GameState::AssetLoading)
@@ -109,13 +114,11 @@ fn main() {
         .add_dynamic_collection_to_loading_state::<_, StandardDynamicAssetCollection>(GameState::AssetLoading, "textures/Bass_Tablature/dynamic_assets.assets.ron",)
         // Asset colection that need to be loaded in the GameState::AssetLoading state
         .add_collection_to_loading_state::<_, CharacterAssets>(GameState::AssetLoading)
-        .add_collection_to_loading_state::<_, LevelAssets>(GameState::AssetLoading)
         .add_collection_to_loading_state::<_, BassPickAsset>(GameState::AssetLoading)
         .add_collection_to_loading_state::<_, VerticalBassStrumAsset>(GameState::AssetLoading)
         .add_collection_to_loading_state::<_, BassStringAsset>(GameState::AssetLoading)
         .add_collection_to_loading_state::<_, BassNoteAssets>(GameState::AssetLoading)
         .add_collection_to_loading_state::<_, FretNumberAssets>(GameState::AssetLoading)
-        .add_collection_to_loading_state::<_, LevelSongAssets>(GameState::AssetLoading)
         // systems to spawn assets into the world
         .add_systems(OnEnter(GameState::AssetLoading), (insert_level_metadata, spawn_load_screen))
         .add_systems(OnExit(GameState::AssetLoading), (spawn_music, spawn_bass_ui, spawn_character, handle_level_camera_translations, load_world))
