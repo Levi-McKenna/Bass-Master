@@ -8,7 +8,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
-use crate::{WorldCamera, LevelState, CurrentJumpCoord, JumpCoords};
+use crate::{WorldCamera, LevelState, CurrentJumpCoord, JumpCoords, LevelResource};
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum NoteState {
@@ -216,11 +216,16 @@ pub fn spawn_bass_ui(
         });
 }
 
-// TODO: dynamic file selection
 pub fn insert_level_metadata(
     mut commands: Commands,
+    level_path_resource: Res<LevelResource>,
 ) {
-    commands.insert_resource(parse_bass_json("assets/levels/built_in/Everlong.json").unwrap());
+    // switch extension to json
+    let mut level_path = level_path_resource.0.clone();
+    level_path.set_extension("json");
+    let level_path = format!("./assets/{}", level_path.to_str().unwrap());
+
+    commands.insert_resource(parse_bass_json(level_path).unwrap());
 }
 
 pub fn spawn_bass_notes(
