@@ -2,13 +2,16 @@ use bevy::prelude::*;
 use bevy_asset_loader::asset_collection::AssetCollection;
 use bevy::sprite::Anchor;
 use bevy_ecs_ldtk::prelude::*;
-use crate::{WorldCamera, LevelState, BassUI, BassNotes, BassPick, NoteState};
+use crate::{WorldCamera, LevelState, BassUI, BassNotes, BassPick, NoteState, NoteCollision, LevelClock, IntroTime};
 
 #[derive(Resource, Default)]
 pub struct CurrentJumpCoord(pub usize);
 
 #[derive(Resource)]
 pub struct JumpCoords(pub Vec<GridCoords>);
+
+#[derive(Resource)]
+pub struct FirstJumpCoord(pub GridCoords);
 
 #[derive(Component, Default)]
 pub struct Jump;
@@ -28,6 +31,12 @@ pub enum MoveState {
     PlatformMove,
     #[default]
     JumpMove
+}
+
+#[derive(Component)]
+pub struct Particle {
+    color: Color,
+    lifetime: f32,
 }
 
 // PLayer struct
@@ -68,7 +77,7 @@ pub fn despawn_character(
     player_query: Query<Entity, With<Bassist>> 
 ) {
     if let Ok(player) = player_query.get_single() {
-        commands.entity(player).despawn();
+        commands.entity(player).despawn_recursive();
     }
 }
 
@@ -79,71 +88,63 @@ pub fn set_player_bounds(
     character_transform.translation.x = -100.0;
 }
 
+/* fn spawn_particles(
+    mut commands: Commands,
+) {
+    
+} */
+
 const PLAYER_SPEED: f32 = 250.0;
 
 pub fn player_movement(
     mut character_query: Query<(&mut Transform, &mut Bassist), Without<WorldCamera>>,
     mut camera_query: Query<&mut Transform, (Without<BassNotes>, Without<BassPick>, With<WorldCamera>, Without<Bassist>)>,
     mut string_query: Query<&mut Transform, (Without<BassNotes>, Without<BassPick>, Without<WorldCamera>, Without<Bassist>, With<BassUI>)>,
+    mut note_collision_event: EventReader<NoteCollision>,
     input: Res<Input<KeyCode>>,
     level_state: Res<State<LevelState>>,
     mut grid_coord_index: ResMut<CurrentJumpCoord>,
     grid_coords: Res<JumpCoords>,
     note_state: Res<State<NoteState>>,
-    mut time: ResMut<Time>,
+    mut time: ResMut<LevelClock>,
 ) {
-    // start game timer if it's not already unpaused
-    if time.is_paused() {
-        time.unpause();
-    }
-
+    time.0.unpause();
     // move camera and player + increment the picks tanslation
     for (mut character_transform, mut bassist) in character_query.iter_mut() {
         // extra query response handles
+
         let mut camera_transform = camera_query.single_mut();
         let mut string_transform = string_query.single_mut();
 
         let mut direction = Vec3::ZERO;
-        // logic for character translations
-        match note_state.get() {
-            &NoteState::Rest => {
-                // translate during rests
-                let position_x: f32 = PLAYER_SPEED * time.delta_seconds();
-                character_transform.translation.x += position_x;
+        let mut position_x: f32 = PLAYER_SPEED * time.0.delta_seconds();
+        let mut position_y: f32 = character_transform.translation.y;
 
-                // translate anything other than the player (i.e. camera, pick)
-                if level_state.get() == &LevelState::Playing {
-                    camera_transform.translation.x += position_x;
-                    string_transform.translation.x += position_x;
-                }
-            },
-            &NoteState::Playing => {
-                // translate to jump spots
-                let mut position_x: f32 = 0.;
+        if note_state.get() == &NoteState::Playing {
+            let jump_grid_xy = ((grid_coords.0[grid_coord_index.0].x as f32 * 16.), (grid_coords.0[grid_coord_index.0].y as f32 * 16.));
+            for collision_event in note_collision_event.iter() {
                 if character_transform.translation.x >= grid_coords.0[grid_coord_index.0].x as f32 {
                     // position_x is for translating the dependents (i.e. camera and bass_ui)
-                    position_x = (grid_coords.0[grid_coord_index.0].x as f32 * 16.) - character_transform.translation.x + 8.;
-                    character_transform.translation.x += position_x;
-                    character_transform.translation.y = grid_coords.0[grid_coord_index.0].y as f32 * 16. + 8.;
-
-                    grid_coord_index.0 += 1;
+                    position_x = (jump_grid_xy.0 - character_transform.translation.x + 8.);
+                    position_y = (jump_grid_xy.1 + 8.);
                 } 
+            }
+            grid_coord_index.0 += 1;
+        }
 
-                if level_state.get() == &LevelState::Playing {
-                    camera_transform.translation.x += position_x;
-                    string_transform.translation.x += position_x;
-                }
-            },
-            _ => panic!("!! Enum MoveState not set for Bassist in player_move query !!")
-        } 
-
-
-        println!("{}", time.elapsed_seconds());
+        character_transform.translation.x += position_x;
+        character_transform.translation.y = position_y;
+        if level_state.get() == &LevelState::Playing {
+            camera_transform.translation.x += position_x;
+            string_transform.translation.x += position_x;
+        }
+        println!("{}", time.0.elapsed_seconds());
     }
 }
 
 pub fn insert_beat_coords(
     mut commands: Commands,
+    bassist_query: Query<&Transform, With<Bassist>>,
     jump_query: Query<&GridCoords, With<Jump>>,
 ) {
     let mut jump_coords = JumpCoords(Vec::new());
@@ -153,6 +154,11 @@ pub fn insert_beat_coords(
         println!("{:?}", grid_coord);
     }
 
+    // wish this was a separate function but the systems scheduling is acting funny
+    // 
+    let bassist_transform = bassist_query.single();
+    let intro_time: f32 = ((jump_coords.0[0].x as f32 * 16.) - bassist_transform.translation.x) / 250.;
+    commands.insert_resource(IntroTime(intro_time));
     commands.insert_resource(jump_coords);
     commands.insert_resource(CurrentJumpCoord(1));
 }

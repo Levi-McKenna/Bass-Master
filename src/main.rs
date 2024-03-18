@@ -32,7 +32,7 @@ pub enum GameState {
     MainMenu,
     InGame,
     Paused,
-    // TODO: Switch default to MenuAssetLoading when the menu assets are ready to be implemented
+    Ending,
     #[default]
     MenuAssetLoading,
     AssetLoading,
@@ -49,6 +49,18 @@ fn setup(mut commands: Commands) {
         },
         WorldCamera
     ));
+}
+
+fn pause_game_clock(
+    mut time: ResMut<Time>,
+) {
+    time.pause();
+}
+
+fn unpause_game_clock(
+    mut time: ResMut<Time>,
+) {
+    time.unpause();
 }
 
 fn set_window_icon(
@@ -86,7 +98,9 @@ fn main() {
         .add_plugins((LdtkPlugin, BellyPlugin))
         .insert_resource(LevelSelection::Index(0))
         .add_event::<QuitEvent>()
+        .add_event::<ExitLevelEvent>()
         .add_event::<WorldEvent>()
+        .add_event::<NoteCollision>()
         // main menu state management
         .add_state::<GameState>()
         .add_state::<LevelState>()
@@ -94,13 +108,12 @@ fn main() {
         .add_state::<NoteState>()
         // Ldtk Entities
         .register_ldtk_entity::<JumpBundle>("Jump")
-        .register_ldtk_entity::<JumpBundle>("JumpReverse")
         // Asset loading state for the main menu
         .add_loading_state(
             LoadingState::new(GameState::MenuAssetLoading)
                 .continue_to_state(GameState::MainMenu)
         )
-        .add_systems(OnEnter(GameState::MenuAssetLoading), draw_main_menu_ui)
+        .add_systems(OnExit(GameState::MenuAssetLoading), draw_main_menu_ui)
         // MainMenu Systems
         .add_systems(Update, (close_event, insert_world_dir).run_if(in_state(GameState::MainMenu)))
         .add_systems(OnExit(GameState::MainMenu), despawn_ui)
@@ -110,7 +123,6 @@ fn main() {
                 .continue_to_state(GameState::AssetsLoaded)
         )
         // Dynamic Asset Loading Location
-        // TODO: FIX THIS SHIT (STANDARDDYNAMICASSETCOLLECTION)
         .add_dynamic_collection_to_loading_state::<_, StandardDynamicAssetCollection>(GameState::AssetLoading, "textures/Bass_Tablature/dynamic_assets.assets.ron",)
         // Asset colection that need to be loaded in the GameState::AssetLoading state
         .add_collection_to_loading_state::<_, CharacterAssets>(GameState::AssetLoading)
@@ -123,19 +135,28 @@ fn main() {
         .add_systems(OnEnter(GameState::AssetLoading), (insert_level_metadata, spawn_load_screen))
         .add_systems(OnExit(GameState::AssetLoading), (spawn_music, spawn_bass_ui, spawn_character, handle_level_camera_translations, load_world))
         // all systems for pre-level start
+        .add_systems(OnEnter(GameState::AssetsLoaded), (set_player_bounds))
         .add_systems(Update, exit_load_screen.run_if(in_state(GameState::AssetsLoaded)))
-        .add_systems(OnExit(GameState::AssetsLoaded), (pause_song_time, set_player_bounds, spawn_bass_notes))
+        .add_systems(OnExit(GameState::AssetsLoaded), (fit_camera_to_window, spawn_bass_notes, insert_beat_coords))
         // MainMenu systems
         /* .add_systems(OnEnter(GameState::MainMenu), (level_start, spawn_menu_world))
         .add_systems(Update, (fit_camera_to_window, handle_level_camera_translations).run_if(in_state(GameState::MainMenu)))
         .add_systems(OnExit(GameState::MainMenu), (despawn_character, despawn_world)) */
         // InGame systems
-        .add_systems(OnEnter(GameState::InGame), (insert_beat_coords, fit_camera_to_window, level_start))
-        .add_systems(Update, (player_movement, translate_bass_notes).run_if(in_state(GameState::InGame)))
-        .add_systems(Update, (manage_note_state,manage_level_states, handle_level_camera_translations, update_time).run_if(in_state(GameState::InGame)))
-        .add_systems(OnExit(GameState::InGame), (despawn_world, despawn_character))
-        // SongState Introduction
-        .add_systems(Startup, (set_window_icon, pause_level_clock, setup))
-        .add_systems(Update, (state_inputs))
+        .add_systems(OnEnter(GameState::InGame), (level_start, unpause_game_clock))
+        .add_systems(Update, (update_level_clock).run_if(in_state(GameState::InGame)))
+        .add_systems(Update, (player_movement, translate_bass_notes, write_note_collision).after(update_level_clock).run_if(in_state(GameState::InGame)))
+        .add_systems(Update, (manage_note_state, manage_level_states, handle_level_camera_translations).run_if(in_state(GameState::InGame)))
+        .add_systems(OnExit(GameState::InGame), (pause_level_clock, pause_game_clock))
+/*         .add_systems(OnExit(GameState::InGame), (despawn_world, despawn_character)) */
+        // GameState::Paused 
+        .add_systems(OnEnter(GameState::Paused), (draw_game_menu_ui, pause_song))
+        .add_systems(Update, (exit_level_event, close_event).run_if(in_state(GameState::Paused)))
+        .add_systems(OnExit(GameState::Paused), (despawn_ui))
+        // GameState::Ending
+        .add_systems(OnEnter(GameState::Ending), (despawn_world, despawn_character, despawn_bass_ui, despawn_music, reset_camera, level_exit).before(load_main_menu))
+        .add_systems(Update, (load_main_menu).run_if(in_state(GameState::Ending)))
+        .add_systems(Startup, (set_window_icon, setup))
+        .add_systems(Update, state_inputs)
         .run();
 }

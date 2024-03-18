@@ -1,8 +1,10 @@
 use bevy::prelude::*;
+use bevy::utils::Instant;
+use bevy::utils::Duration;
 use bevy_asset_loader::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use std::path::{Path, PathBuf};
-use crate::{WorldCamera, Bassist, GameState, WorldEvent};
+use crate::{WorldCamera, Bassist, GameState, WorldEvent, IntroTime};
 
 // Marker Component
 #[derive(Component)]
@@ -14,11 +16,15 @@ pub enum LevelState {
     OutOfLevel,
     Introduction,
     Playing,
+    Paused,
     Ending
 }
 
 #[derive(Resource)]
 pub struct LevelResource(pub PathBuf);
+
+#[derive(Debug, Resource)]
+pub struct LevelClock(pub Time);
 
 pub fn insert_world_dir(
     mut commands: Commands,
@@ -54,6 +60,7 @@ pub fn load_world(
     },
         CurrentLevel {}
     ));
+    commands.insert_resource(LevelClock(Time::new(Instant::now())));
 }
 
 pub fn manage_level_states(
@@ -70,7 +77,7 @@ pub fn manage_level_states(
             let window = window_query.single();
             let level = &ldtk_level.level;
             let camera_transform = camera_query.single();
-            let character_transform = character_query.single();;
+            let character_transform = character_query.single();
 
             // If world will be out of bounds in either direction before and after the bassist
             // is off or on screen we set the x translation accordingly 
@@ -98,18 +105,40 @@ pub fn despawn_world(
     });
 }
 
-
 pub fn level_start(
-    game_state: Res<State<GameState>>,
+    level_state: Res<State<LevelState>>,
     mut change_level_state: ResMut<NextState<LevelState>>,
 ) {
-    if game_state.get() == &GameState::InGame {
+    if level_state.get() == &LevelState::OutOfLevel {
         change_level_state.set(LevelState::Introduction);
     }
 }
 
-pub fn pause_level_clock(
-    mut time: ResMut<Time>,
+pub fn level_exit(
+    mut commands: Commands,
+    mut change_level_state: ResMut<NextState<LevelState>>,
 ) {
-    time.pause();
+    change_level_state.set(LevelState::OutOfLevel);
+    commands.remove_resource::<LevelClock>();
+    commands.remove_resource::<IntroTime>();
 }
+
+// clock systems
+pub fn update_level_clock(
+    mut clock: ResMut<LevelClock>,
+) {
+    clock.0.update();
+}
+
+pub fn unpause_level_clock(
+    mut clock: ResMut<LevelClock>,
+) {
+    clock.0.unpause();
+}
+
+pub fn pause_level_clock(
+    mut clock: ResMut<LevelClock>,
+) {
+    clock.0.pause();
+}
+

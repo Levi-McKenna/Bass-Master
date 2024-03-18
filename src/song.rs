@@ -12,8 +12,8 @@ pub enum SongState {
     Playing
 }
 
-#[derive(Debug, Resource)]
-pub struct SongDuration(Time);
+#[derive(Component)]
+pub struct Song;
 
 pub fn spawn_music(
     mut commands: Commands,
@@ -33,27 +33,24 @@ pub fn spawn_music(
             paused: true,
             ..default()
         },
-    }));
-    commands.insert_resource(SongDuration(Time::new(Instant::now())));
+    },
+        Song,
+    ));
 }
 
-pub fn pause_song_time(
-    mut song_time: ResMut<SongDuration>,
+pub fn despawn_music(
+    mut commands: Commands,
+    song_query: Query<Entity, With<Song>>,
 ) {
-    song_time.0.pause();
-}
-
-pub fn update_time(
-    mut song_time: ResMut<SongDuration>,
-) {
-    if song_time.0.is_paused() {
-        song_time.0.unpause();
+    if let Ok(song) = song_query.get_single() {
+        commands.entity(song).despawn_recursive();
     }
-    song_time.0.update();
 }
 
-pub fn print_song_time(
-    song_time: Res<SongDuration>,
+pub fn pause_song(
+    mut song_settings_query: Query<&AudioSink>,
 ) {
-    println!("{:?}", song_time.0.elapsed_seconds());
+    let mut song_settings = song_settings_query.single_mut();
+    song_settings.pause();
 }
+

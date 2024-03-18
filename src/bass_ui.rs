@@ -8,7 +8,12 @@ use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
-use crate::{WorldCamera, LevelState, CurrentJumpCoord, JumpCoords, LevelResource};
+use crate::{WorldCamera, LevelState, CurrentJumpCoord, JumpCoords, LevelResource, LevelClock, Bassist};
+
+#[derive(Event)]
+pub struct NoteCollision {
+    pub speed_manipulation: f32,
+}
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
 pub enum NoteState {
@@ -22,7 +27,10 @@ pub enum NoteState {
 pub struct BassUI;
 
 #[derive(Component)]
-pub struct BassNotes { note: i8 }
+pub struct BassNotes { 
+    note: i8,
+    speed_manipulation: f32,
+}
 
 #[derive(Component)]
 pub struct BassFrets;
@@ -46,6 +54,9 @@ pub struct MusicJson {
     NoteValue: i8,
     Notes: Vec<Note>,
 }
+
+#[derive(Resource)]
+pub struct IntroTime(pub f32);
 
 #[derive(Component)]
 pub struct BassString(String);
@@ -257,7 +268,10 @@ pub fn spawn_bass_notes(
                         },
                         ..default()
                     },
-                    BassNotes { note: note.Note }
+                    BassNotes { 
+                        note: note.Note,
+                        speed_manipulation: note_speed_manipulation(note.Note, tablature.BPM, tablature.NoteValue), 
+                    }
                 )).with_children(|parent| {
                         parent.spawn((
                             SpriteSheetBundle {
@@ -281,14 +295,41 @@ pub fn spawn_bass_notes(
     }
 }
 
+pub fn despawn_bass_ui(
+    mut commands: Commands,
+    bass_ui_query: Query<Entity, With<BassUI>>,
+) {
+    if let Ok(bass_ui) = bass_ui_query.get_single() {
+        commands.entity(bass_ui).despawn_recursive();
+    }
+}
+
+pub fn write_note_collision(
+    mut writer: EventWriter<NoteCollision>,
+    bass_note_query: Query<(&Transform, &BassNotes)>,
+    pick_query: Query<&Transform, (With<BassPick>, Without<BassNotes>)>,
+) {
+    let pick_transform = pick_query.single();
+
+    for (bass_note_transform, bass_note) in &bass_note_query {
+        if bass_note_transform.translation.x <= pick_transform.translation.x ||
+        bass_note_transform.translation.x - NOTE_OFFSET <= pick_transform.translation.x {
+            writer.send(NoteCollision { speed_manipulation: bass_note.speed_manipulation });
+        }
+    }
+}
+
+
+// TODO: calculate length between bassist and first jumpcoord to time
 pub fn translate_bass_notes(
     mut bass_note_query: Query<(&mut Transform, &mut Visibility, &BassNotes), (With<BassNotes>, Without<BassPick>)>,
     level_state: Res<State<LevelState>>,
+    intro_time: Res<IntroTime>,
     pick_query: Query<&Transform, (With<BassPick>, Without<BassNotes>)>,
     mut audio_query: Query<&AudioSink>,
-    tablature: Res<MusicJson>,
     mut change_note_state: ResMut<NextState<NoteState>>,
-    time: Res<Time>,
+    tablature: Res<MusicJson>,
+    time: Res<LevelClock>,
 ) {
     let pick_transform = pick_query.single();
     let mut audio_settings = audio_query.single_mut();
@@ -299,8 +340,8 @@ pub fn translate_bass_notes(
             *bass_note_visibility = Visibility::Visible;
         }
 
-        if time.elapsed_seconds() <= INTRODUCTION_LENGTH_SECONDS {
-            bass_note_transform.translation.x -= HORIZONTAL_BASS_WIDTH * (time.delta_seconds() / INTRODUCTION_LENGTH_SECONDS);
+        if time.0.elapsed_seconds() <= intro_time.0 {
+            bass_note_transform.translation.x -= (HORIZONTAL_BASS_WIDTH + 9.) * (time.0.delta_seconds() / intro_time.0);
         } else {
             // unpause song if needed
             if audio_settings.is_paused() {
@@ -310,11 +351,11 @@ pub fn translate_bass_notes(
             let mut speed_scale: f32;
             if bass_note_transform.translation.x <= pick_transform.translation.x ||
             bass_note_transform.translation.x - NOTE_OFFSET <= pick_transform.translation.x {
-                speed_scale = note_speed_manipulation(note.note, tablature.BPM, tablature.NoteValue);
+                speed_scale = note.speed_manipulation;
             } else {
                 speed_scale = note_speed_manipulation(tablature.NoteValue, tablature.BPM, tablature.NoteValue);
             }
-            bass_note_transform.translation.x -= (NOTE_WIDTH + NOTE_OFFSET) * (time.delta_seconds() / speed_scale);
+            bass_note_transform.translation.x -= (NOTE_WIDTH + NOTE_OFFSET) * (time.0.delta_seconds() / speed_scale);
         }
     }
 }

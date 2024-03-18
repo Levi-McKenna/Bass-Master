@@ -56,3 +56,9 @@ pub fn handle_level_camera_translations(
     
 } 
 
+pub fn reset_camera(
+    mut camera_query: Query<&mut Transform, With<WorldCamera>>,
+) {
+    let mut camera = camera_query.single_mut();
+    camera.translation.x = 0.;
+}

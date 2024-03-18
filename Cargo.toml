@@ -15,3 +15,4 @@ serde_json = "1.0.111"
 belly = { git = "https://github.com/jkb0o/belly.git" }
 winit = "0.28.7"
 image = "0.24.7"
+cpal = "0.15.3"
