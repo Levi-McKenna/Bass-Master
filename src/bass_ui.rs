@@ -12,7 +12,8 @@ use crate::{WorldCamera, LevelState, CurrentJumpCoord, JumpCoords, LevelResource
 
 #[derive(Event)]
 pub struct NoteCollision {
-    pub speed_manipulation: f32,
+    pub chord: String,
+    pub fret: i8,
 }
 
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
@@ -29,6 +30,8 @@ pub struct BassUI;
 #[derive(Component)]
 pub struct BassNotes { 
     note: i8,
+    fret: i8,
+    chord: String,
     speed_manipulation: f32,
 }
 
@@ -270,6 +273,8 @@ pub fn spawn_bass_notes(
                     },
                     BassNotes { 
                         note: note.Note,
+                        fret: note.Fret,
+                        chord: note.String.clone(),
                         speed_manipulation: note_speed_manipulation(note.Note, tablature.BPM, tablature.NoteValue), 
                     }
                 )).with_children(|parent| {
@@ -312,9 +317,9 @@ pub fn write_note_collision(
     let pick_transform = pick_query.single();
 
     for (bass_note_transform, bass_note) in &bass_note_query {
-        if bass_note_transform.translation.x <= pick_transform.translation.x ||
-        bass_note_transform.translation.x - NOTE_OFFSET <= pick_transform.translation.x {
-            writer.send(NoteCollision { speed_manipulation: bass_note.speed_manipulation });
+        if bass_note_transform.translation.x >= pick_transform.translation.x - 5. &&
+        bass_note_transform.translation.x <= pick_transform.translation.x + 5. {
+            writer.send(NoteCollision { chord: bass_note.chord.clone(), fret: bass_note.fret });
         }
     }
 }
@@ -328,6 +333,7 @@ pub fn translate_bass_notes(
     pick_query: Query<&Transform, (With<BassPick>, Without<BassNotes>)>,
     mut audio_query: Query<&AudioSink>,
     mut change_note_state: ResMut<NextState<NoteState>>,
+    mut writer: EventWriter<NoteCollision>,
     tablature: Res<MusicJson>,
     time: Res<LevelClock>,
 ) {

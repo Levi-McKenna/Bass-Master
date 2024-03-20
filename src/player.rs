@@ -138,7 +138,7 @@ pub fn player_movement(
             camera_transform.translation.x += position_x;
             string_transform.translation.x += position_x;
         }
-        println!("{}", time.0.elapsed_seconds());
+/*         println!("{}", time.0.elapsed_seconds()); */
     }
 }
 

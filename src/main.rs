@@ -6,6 +6,7 @@ mod load_screen;
 mod camera;
 mod bass_ui;
 mod song;
+mod bass;
 
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
@@ -20,11 +21,12 @@ use winit::window::Icon;
 use player::*;
 use level::*;
 use menu::*;
-use input::state_inputs;
+use input::*;
 use load_screen::*;
 use camera::*;
 use bass_ui::*;
 use song::*;
+use bass::pitch_detector::*;
 
 // States for game status
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
@@ -41,6 +43,9 @@ pub enum GameState {
 
 #[derive(Component)]
 pub struct WorldCamera;
+
+#[derive(Resource)]
+pub struct LevelScore(i32);
 
 fn setup(mut commands: Commands) {
     commands.spawn((
@@ -97,10 +102,12 @@ fn main() {
         }))
         .add_plugins((LdtkPlugin, BellyPlugin))
         .insert_resource(LevelSelection::Index(0))
+        .insert_resource(LevelScore(0))
         .add_event::<QuitEvent>()
         .add_event::<ExitLevelEvent>()
         .add_event::<WorldEvent>()
         .add_event::<NoteCollision>()
+        .add_event::<BassInput>()
         // main menu state management
         .add_state::<GameState>()
         .add_state::<LevelState>()
@@ -143,9 +150,9 @@ fn main() {
         .add_systems(Update, (fit_camera_to_window, handle_level_camera_translations).run_if(in_state(GameState::MainMenu)))
         .add_systems(OnExit(GameState::MainMenu), (despawn_character, despawn_world)) */
         // InGame systems
-        .add_systems(OnEnter(GameState::InGame), (level_start, unpause_game_clock))
+        .add_systems(OnEnter(GameState::InGame), (read_audiostream, level_start, unpause_game_clock))
         .add_systems(Update, (update_level_clock).run_if(in_state(GameState::InGame)))
-        .add_systems(Update, (player_movement, translate_bass_notes, write_note_collision).after(update_level_clock).run_if(in_state(GameState::InGame)))
+        .add_systems(Update, (player_movement, translate_bass_notes, read_input_stream, print_if_true, write_note_collision).after(update_level_clock).run_if(in_state(GameState::InGame)))
         .add_systems(Update, (manage_note_state, manage_level_states, handle_level_camera_translations).run_if(in_state(GameState::InGame)))
         .add_systems(OnExit(GameState::InGame), (pause_level_clock, pause_game_clock))
 /*         .add_systems(OnExit(GameState::InGame), (despawn_world, despawn_character)) */
@@ -154,7 +161,7 @@ fn main() {
         .add_systems(Update, (exit_level_event, close_event).run_if(in_state(GameState::Paused)))
         .add_systems(OnExit(GameState::Paused), (despawn_ui))
         // GameState::Ending
-        .add_systems(OnEnter(GameState::Ending), (despawn_world, despawn_character, despawn_bass_ui, despawn_music, reset_camera, level_exit).before(load_main_menu))
+        .add_systems(OnEnter(GameState::Ending), (despawn_world, despawn_character, despawn_bass_ui, despawn_music, reset_camera, level_exit, reset_score).before(load_main_menu))
         .add_systems(Update, (load_main_menu).run_if(in_state(GameState::Ending)))
         .add_systems(Startup, (set_window_icon, setup))
         .add_systems(Update, state_inputs)
