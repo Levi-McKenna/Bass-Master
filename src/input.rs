@@ -79,11 +79,8 @@ pub fn read_input_stream(
     ]);
 
     for estimate in receiver.try_iter() {
-        // if out of bounds... don't count
-        if estimate < 20. || estimate > 88. {
-            continue;
-        }
         for collision in collision_events.iter() {
+            println!("balls");
             let freq_bounds = freq_to_note.get(collision.chord.as_str()).unwrap();
             if estimate >= freq_bounds[collision.fret as usize].0 && estimate <= freq_bounds[collision.fret as usize].1 {
                 println!("Chord -> {}, Fret -> {}", collision.chord, collision.fret);
@@ -101,7 +98,7 @@ pub fn print_if_true(
 ) {
     for events in correct_events.iter() {
         if events.0 {
-            score.0 += 100;
+            score.0 += 200;
         } else {
             score.0 -= 50;
         }

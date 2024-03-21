@@ -393,7 +393,7 @@ fn parse_bass_json<P: AsRef<Path>>(path: P) -> Result<MusicJson, Box<dyn Error>>
     Ok(tablature)
 }
 
-// This is for managing the note state that controls the type of player movement in player.rs.
+/* // This is for managing the note state that controls the type of player movement in player.rs.
 pub fn manage_note_state(
     bass_note_query: Query<&Transform, (With<BassNotes>, Without<BassPick>)>,
     pick_query: Query<&Transform, (With<BassPick>, Without<BassNotes>)>,
@@ -413,7 +413,7 @@ pub fn manage_note_state(
             change_note_state.set(NoteState::Rest);
         }
     }
-}
+} */
 
 pub fn spawn_score(
     mut commands: Commands,

@@ -153,7 +153,7 @@ fn main() {
         .add_systems(OnEnter(GameState::InGame), (read_audiostream, level_start, unpause_game_clock))
         .add_systems(Update, (update_level_clock).run_if(in_state(GameState::InGame)))
         .add_systems(Update, (player_movement, translate_bass_notes, read_input_stream, print_if_true, write_note_collision).after(update_level_clock).run_if(in_state(GameState::InGame)))
-        .add_systems(Update, (game_state_end, update_score, manage_note_state, manage_level_states, handle_level_camera_translations).run_if(in_state(GameState::InGame)))
+        .add_systems(Update, (game_state_end, update_score, manage_level_states, handle_level_camera_translations).run_if(in_state(GameState::InGame)))
         .add_systems(OnExit(GameState::InGame), (pause_level_clock, pause_game_clock))
 /*         .add_systems(OnExit(GameState::InGame), (despawn_world, despawn_character)) */
         // GameState::Paused 

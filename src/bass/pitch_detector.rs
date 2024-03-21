@@ -73,14 +73,14 @@ pub fn read_audiostream(
                         let f64_vals: Vec<f64> = consumer.iter().map(|x| *x as f64).collect();
                         let mut detector = McLeodDetector::new(SIZE, PADDING);
                         if let Some(estimate) = detector.get_pitch(&f64_vals, SAMPLE_RATE, POWER_THRESHOLD, CLARITY_THRESHOLD) {
-                            tx.send(estimate.frequency).unwrap();
-/*                                     println!("Chord -> A, Fret -> {}", i); */
-                            println!("Estimated Frequency: {}", estimate.frequency);
+                            // if out of bounds... don't count
+                            if estimate.frequency > 20. && estimate.frequency < 88. {
+                                tx.send(estimate.frequency).unwrap();
+                                println!("Estimated Frequency: {}", estimate.frequency);
+                            }
                         } else {
-                            tx.send(-1.).unwrap();
-                            println!("Estimated Frequency: -1");
                         }
-                            consumer.clear();
+                        consumer.clear();
                     } else {
                         let index_num = producer.push_slice(input);
                     }
