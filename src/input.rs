@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use std::collections::HashMap;
 use crate::{GameState, LevelState, NoteCollision, bass::pitch_detector::StreamReceiver, LevelScore};
 
 #[derive(Event)]
@@ -21,15 +22,76 @@ pub fn read_input_stream(
     mut input_events: EventWriter<BassInput>,
     mut collision_events: EventReader<NoteCollision>,
 ) {
-    for (fret, chord) in receiver.try_iter() {
+    // hashmap containing chord to frequency corresponding values
+    let freq_to_note: HashMap<&str, [(f64, f64); 11]> = HashMap::from([
+        ("E", [
+            (20., 21.),
+            (22., 23.),
+            (23., 24.),
+            (24., 25.),
+            (26., 27.),
+            (27., 28.),
+            (29., 30.),
+            (31., 32.),
+            (32., 33.),
+            (34., 36.),
+            (36., 38.),
+        ]),
+        ("A", [
+            (26., 28.),
+            (28., 30.),
+            (30., 32.),
+            (32., 34.),
+            (34., 36.),
+            (36., 38.),
+            (38., 40.),
+            (40., 42.),
+            (42., 45.),
+            (45., 47.),
+            (47., 49.),
+        ]),
+        ("D", [
+            (36., 37.),
+            (39., 40.),
+            (41., 42.),
+            (43., 44.),
+            (46., 47.),
+            (49., 50.),
+            (52., 53.),
+            (55., 56.),
+            (58., 59.),
+            (61., 63.),
+            (65., 66.),
+        ]),
+        ("G", [
+            (48., 50.),
+            (52., 53.),
+            (54., 55.5),
+            (58., 59.),
+            (61., 62.),
+            (65., 66.),
+            (69., 70.),
+            (73., 74.),
+            (77., 78.),
+            (82., 83.),
+            (87., 88.),
+        ]),
+    ]);
+
+    for estimate in receiver.try_iter() {
+        // if out of bounds... don't count
+        if estimate < 20. || estimate > 88. {
+            continue;
+        }
         for collision in collision_events.iter() {
-            if fret == collision.fret && chord == collision.chord {
+            let freq_bounds = freq_to_note.get(collision.chord.as_str()).unwrap();
+            if estimate >= freq_bounds[collision.fret as usize].0 && estimate <= freq_bounds[collision.fret as usize].1 {
+                println!("Chord -> {}, Fret -> {}", collision.chord, collision.fret);
                 input_events.send(BassInput(true));
             } else {
                 input_events.send(BassInput(false));
             }
         }
-        collision_events.clear();
     }
 }
 
@@ -43,7 +105,7 @@ pub fn print_if_true(
         } else {
             score.0 -= 50;
         }
-        println!("{}", score.0);
+        println!("Score -> {}", score.0);
     }
     correct_events.clear();
 }

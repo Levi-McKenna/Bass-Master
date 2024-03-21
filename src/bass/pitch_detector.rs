@@ -6,7 +6,6 @@ use pitch_detection::detector::PitchDetector;
 use ringbuf::*;
 use ringbuf::ring_buffer::{RbRead, RbRef, RbWrite};
 use crossbeam_channel::{bounded, Receiver};
-use std::collections::HashMap;
 use std::thread;
 use std::time::Duration;
 use crate::{NoteCollision};
@@ -42,7 +41,7 @@ impl ChordFret {
 } */
 
 #[derive(Resource, Deref)]
-pub struct StreamReceiver(Receiver<(i8, String)>);
+pub struct StreamReceiver(Receiver<f64>);
 
 pub fn read_audiostream(
     mut commands: Commands,
@@ -53,24 +52,8 @@ pub fn read_audiostream(
         .expect("failed to find input device");
     let config = device.default_input_config().unwrap();
 
-    let (tx, rx) = bounded::<(i8, String)>(1);
+    let (tx, rx) = bounded::<f64>(1);
     thread::spawn(move || {
-        // hashmap containing chord to frequency corresponding values
-        let freq_to_note: HashMap<&str, [(f64, f64); 11]> = HashMap::from([
-            ("A", [
-                (26., 28.),
-                (28., 30.),
-                (30., 32.),
-                (32., 34.),
-                (34., 36.),
-                (36., 38.),
-                (38., 40.),
-                (40., 42.),
-                (42., 45.),
-                (45., 47.),
-                (47., 49.),
-            ]),
-        ]);
         // ring buffer initialization
         let ring_buffer = HeapRb::<f32>::new(8192);
         let (mut producer, mut consumer) = ring_buffer.split();
@@ -90,16 +73,11 @@ pub fn read_audiostream(
                         let f64_vals: Vec<f64> = consumer.iter().map(|x| *x as f64).collect();
                         let mut detector = McLeodDetector::new(SIZE, PADDING);
                         if let Some(estimate) = detector.get_pitch(&f64_vals, SAMPLE_RATE, POWER_THRESHOLD, CLARITY_THRESHOLD) {
-                            let freq_bounds = freq_to_note.get("A").unwrap();
-                            for i in 0..freq_bounds.len() {
-                                if estimate.frequency >= freq_bounds[i].0 && estimate.frequency <= freq_bounds[i].1 {
-                                    tx.send((i as i8, "A".to_string())).unwrap();
+                            tx.send(estimate.frequency).unwrap();
 /*                                     println!("Chord -> A, Fret -> {}", i); */
-                                }
-                            }
-/*                             println!("Estimated Frequency: {}", estimate.frequency); */
+                            println!("Estimated Frequency: {}", estimate.frequency);
                         } else {
-/*                             println!("Estimated Frequency: -1"); */
+                            println!("Estimated Frequency: -1");
                         }
                             consumer.clear();
                     } else {

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_asset_loader::asset_collection::AssetCollection;
 use bevy::sprite::Anchor;
 use bevy_ecs_ldtk::prelude::*;
-use crate::{WorldCamera, LevelState, BassUI, BassNotes, BassPick, NoteState, NoteCollision, LevelClock, IntroTime};
+use crate::{WorldCamera, LevelState, BassUI, BassNotes, BassPick, NoteState, NoteCollision, LevelClock, IntroTime, GameState};
 
 #[derive(Resource, Default)]
 pub struct CurrentJumpCoord(pub usize);
@@ -120,16 +120,16 @@ pub fn player_movement(
         let mut position_x: f32 = PLAYER_SPEED * time.0.delta_seconds();
         let mut position_y: f32 = character_transform.translation.y;
 
-        if note_state.get() == &NoteState::Playing {
-            let jump_grid_xy = ((grid_coords.0[grid_coord_index.0].x as f32 * 16.), (grid_coords.0[grid_coord_index.0].y as f32 * 16.));
-            for collision_event in note_collision_event.iter() {
-                if character_transform.translation.x >= grid_coords.0[grid_coord_index.0].x as f32 {
-                    // position_x is for translating the dependents (i.e. camera and bass_ui)
-                    position_x = (jump_grid_xy.0 - character_transform.translation.x + 8.);
-                    position_y = (jump_grid_xy.1 + 8.);
-                } 
-            }
-            grid_coord_index.0 += 1;
+        let jump_grid_xy = ((grid_coords.0[grid_coord_index.0].x as f32 * 16.), (grid_coords.0[grid_coord_index.0].y as f32 * 16.));
+        for collision_event in note_collision_event.iter() {
+            if character_transform.translation.x >= grid_coords.0[grid_coord_index.0].x as f32 {
+                // position_x is for translating the dependents (i.e. camera and bass_ui)
+                position_x = (jump_grid_xy.0 - character_transform.translation.x + 8.);
+                position_y = (jump_grid_xy.1 + 8.);
+                if grid_coord_index.0 < grid_coords.0.len() - 1 {
+                    grid_coord_index.0 += 1;
+                }
+            } 
         }
 
         character_transform.translation.x += position_x;
@@ -163,6 +163,17 @@ pub fn insert_beat_coords(
     commands.insert_resource(CurrentJumpCoord(1));
 }
 
-/* pub fn bassist_state_handle(
+pub fn game_state_end(
+    mut camera_query: Query<&Transform, With<WorldCamera>>,
+    bassist_query: Query<&Transform, With<Bassist>>,
+    window_query: Query<&Window>,
+    mut change_game_state: ResMut<NextState<GameState>>,
+) {
+    let camera_transform = camera_query.single();
+    let bassist_transform = bassist_query.single();
+    let window = window_query.single();
 
-) */
+    if bassist_transform.translation.x >= camera_transform.translation.x + window.width() / 2 as f32 {
+        change_game_state.set(GameState::Ending);
+    }
+}

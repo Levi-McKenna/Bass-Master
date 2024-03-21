@@ -8,7 +8,7 @@ use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
-use crate::{WorldCamera, LevelState, CurrentJumpCoord, JumpCoords, LevelResource, LevelClock, Bassist};
+use crate::{WorldCamera, LevelState, CurrentJumpCoord, JumpCoords, LevelResource, LevelClock, Bassist, LevelScore};
 
 #[derive(Event)]
 pub struct NoteCollision {
@@ -40,6 +40,9 @@ pub struct BassFrets;
 
 #[derive(Component)]
 pub struct BassPick;
+
+#[derive(Component)]
+pub struct ScoreUI;
 
 // structs
 #[derive(Deserialize, Debug, Resource)]
@@ -310,22 +313,23 @@ pub fn despawn_bass_ui(
 }
 
 pub fn write_note_collision(
+    mut commands: Commands,
     mut writer: EventWriter<NoteCollision>,
-    bass_note_query: Query<(&Transform, &BassNotes)>,
+    bass_note_query: Query<(&Transform, &BassNotes, Entity)>,
     pick_query: Query<&Transform, (With<BassPick>, Without<BassNotes>)>,
 ) {
     let pick_transform = pick_query.single();
 
-    for (bass_note_transform, bass_note) in &bass_note_query {
-        if bass_note_transform.translation.x >= pick_transform.translation.x - 5. &&
-        bass_note_transform.translation.x <= pick_transform.translation.x + 5. {
+    for (bass_note_transform, bass_note, entity) in &bass_note_query {
+        if bass_note_transform.translation.x <= pick_transform.translation.x &&
+        bass_note_transform.translation.x >= pick_transform.translation.x - 5. {
             writer.send(NoteCollision { chord: bass_note.chord.clone(), fret: bass_note.fret });
+            commands.entity(entity).despawn_recursive();
         }
     }
 }
 
 
-// TODO: calculate length between bassist and first jumpcoord to time
 pub fn translate_bass_notes(
     mut bass_note_query: Query<(&mut Transform, &mut Visibility, &BassNotes), (With<BassNotes>, Without<BassPick>)>,
     level_state: Res<State<LevelState>>,
@@ -346,8 +350,8 @@ pub fn translate_bass_notes(
             *bass_note_visibility = Visibility::Visible;
         }
 
-        if time.0.elapsed_seconds() <= intro_time.0 {
-            bass_note_transform.translation.x -= (HORIZONTAL_BASS_WIDTH + 9.) * (time.0.delta_seconds() / intro_time.0);
+        if time.0.elapsed_seconds() <= intro_time.0 + 0.42 {
+            bass_note_transform.translation.x -= (HORIZONTAL_BASS_WIDTH) * (time.0.delta_seconds() / intro_time.0);
         } else {
             // unpause song if needed
             if audio_settings.is_paused() {
@@ -408,5 +412,59 @@ pub fn manage_note_state(
         } else if note_state.get() != &NoteState::Rest{
             change_note_state.set(NoteState::Rest);
         }
+    }
+}
+
+pub fn spawn_score(
+    mut commands: Commands,
+) {
+    // scorespawn
+    commands.spawn((
+        NodeBundle {
+            style: Style {
+                width: Val::Percent(100.0),
+                height: Val::Percent(100.0),
+                position_type: PositionType::Absolute,
+                justify_content: JustifyContent::End,
+                align_items: AlignItems::Start,
+                ..default()
+            },
+            ..default()
+        },
+        ScoreUI,
+    )).with_children(|parent| {
+            parent.spawn((TextBundle {
+                text: Text::from_section(
+                    "0",
+                    TextStyle {
+                        font_size: 60.0,
+                        color: Color::rgba(0., 0.9098039215686274, 1., 1.),
+                        ..default()
+                    }
+                ),
+                ..default()
+            }.with_style(Style {
+                 ..default()   
+            }),
+            Label));
+    });
+}
+
+pub fn update_score(
+    mut text_query: Query<&mut Text>,
+    score: Res<LevelScore>,
+) {
+    let mut sections = text_query.single_mut();
+    for mut section in sections.sections.iter_mut() {
+        section.value = score.0.to_string();
+    }
+}
+
+pub fn despawn_score(
+    mut commands: Commands,
+    score_query: Query<Entity, With<ScoreUI>>,
+) {
+    for score in score_query.iter() {
+        commands.entity(score).despawn_recursive();
     }
 }
