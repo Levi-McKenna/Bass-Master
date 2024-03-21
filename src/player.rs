@@ -63,7 +63,7 @@ pub fn spawn_character(
         transform: Transform::from_xyz(-1000.0, 336.0 / 2.0, 100.0),
         sprite: TextureAtlasSprite {
             custom_size: Some(Vec2::splat(16.0)),
-            anchor: Anchor::Center,
+            anchor: Anchor::CenterRight,
             ..default()
         },
         ..default()

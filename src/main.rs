@@ -140,7 +140,7 @@ fn main() {
         .add_collection_to_loading_state::<_, FretNumberAssets>(GameState::AssetLoading)
         // systems to spawn assets into the world
         .add_systems(OnEnter(GameState::AssetLoading), (insert_level_metadata, spawn_load_screen))
-        .add_systems(OnExit(GameState::AssetLoading), (spawn_score, spawn_music, spawn_bass_ui, spawn_character, handle_level_camera_translations, load_world))
+        .add_systems(OnExit(GameState::AssetLoading), (spawn_score, spawn_music, spawn_bass_ui, spawn_character, load_world))
         // all systems for pre-level start
         .add_systems(OnEnter(GameState::AssetsLoaded), (set_player_bounds))
         .add_systems(Update, exit_load_screen.run_if(in_state(GameState::AssetsLoaded)))

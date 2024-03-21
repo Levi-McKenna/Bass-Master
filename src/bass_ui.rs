@@ -350,8 +350,8 @@ pub fn translate_bass_notes(
             *bass_note_visibility = Visibility::Visible;
         }
 
-        if time.0.elapsed_seconds() <= intro_time.0 + 0.42 {
-            bass_note_transform.translation.x -= (HORIZONTAL_BASS_WIDTH) * (time.0.delta_seconds() / intro_time.0);
+        if time.0.elapsed_seconds() <= intro_time.0 {
+            bass_note_transform.translation.x -= (HORIZONTAL_BASS_WIDTH + NOTE_WIDTH) * (time.0.delta_seconds() / intro_time.0);
         } else {
             // unpause song if needed
             if audio_settings.is_paused() {

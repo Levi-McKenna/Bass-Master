@@ -77,6 +77,7 @@ pub fn read_audiostream(
 /*                                     println!("Chord -> A, Fret -> {}", i); */
                             println!("Estimated Frequency: {}", estimate.frequency);
                         } else {
+                            tx.send(-1.).unwrap();
                             println!("Estimated Frequency: -1");
                         }
                             consumer.clear();

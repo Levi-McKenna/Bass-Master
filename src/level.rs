@@ -4,7 +4,7 @@ use bevy::utils::Duration;
 use bevy_asset_loader::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use std::path::{Path, PathBuf};
-use crate::{WorldCamera, Bassist, GameState, WorldEvent, IntroTime};
+use crate::{WorldCamera, Bassist, GameState, WorldEvent, IntroTime, WindowScaleFactor};
 
 // Marker Component
 #[derive(Component)]
@@ -71,6 +71,7 @@ pub fn manage_level_states(
     ldtk_levels: Res<Assets<LdtkLevel>>,
     mut change_level_state: ResMut<NextState<LevelState>>,
     level_state: Res<State<LevelState>>,
+    scale_factor: Res<WindowScaleFactor>,
 ) {
     for level_handle in level_query.iter(){
         if let Some(ldtk_level) = ldtk_levels.get(level_handle) {
@@ -87,7 +88,7 @@ pub fn manage_level_states(
                 &LevelState::Introduction if character_transform.translation.x >= (camera_transform.translation.x) => 
                     change_level_state.set(LevelState::Playing),
                 // if camera is out of bounds of leve
-                &LevelState::Playing if (camera_transform.translation.x + window.width() / 2.0) >= level.px_wid as f32 =>  
+                &LevelState::Playing if (camera_transform.translation.x + (window.width() / 2.0) * scale_factor.0) >= level.px_wid as f32 =>  
                     change_level_state.set(LevelState::Ending),
                 // if nuthin
                 &_ => (),

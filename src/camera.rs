@@ -3,9 +3,13 @@ use bevy_ecs_ldtk::prelude::*;
 use bevy::render::camera::ScalingMode;
 use crate::{WorldCamera, Bassist, LevelState};
 
+#[derive(Resource)]
+pub struct WindowScaleFactor(pub f32);
+
 // Two identical functions coming right up
 // fit camera to level when the camera has whitespace
 pub fn fit_camera_to_window (
+    mut commands: Commands,
     mut camera_query: Query<(&mut bevy::render::camera::OrthographicProjection, &mut Transform), With<WorldCamera>>,
     level_query: Query<(&Handle<LdtkLevel>), (Without<Bassist>, Without<WorldCamera>)>,
     window_query: Query<&Window>,
@@ -29,6 +33,8 @@ pub fn fit_camera_to_window (
                 if (camera_transform.translation.x - window.width() / 2.0) <= 0.0 { 
                     camera_transform.translation.x = (window.width() / 2.0) * scale_factor;
                 }
+
+                commands.insert_resource(WindowScaleFactor(scale_factor));
             }
         }       
     }
@@ -41,6 +47,7 @@ pub fn handle_level_camera_translations(
     window_query: Query<&Window>,
     ldtk_levels: Res<Assets<LdtkLevel>>,
     level_state: Res<State<LevelState>>,
+    scale_factor: Res<WindowScaleFactor>,
 ) {
     for level_handle in level_query.iter(){
         if let Some(ldtk_level) = ldtk_levels.get(level_handle) {
@@ -49,7 +56,7 @@ pub fn handle_level_camera_translations(
             let mut camera_transform = camera_query.single_mut();
 
             if level_state.get() == &LevelState::Ending {
-                camera_transform.translation.x = level.px_wid as f32 - window.width() as f32 / 2.0;
+                camera_transform.translation.x = level.px_wid as f32 - (window.width() as f32 / 2.0) * scale_factor.0;
             }
         }
     }       
