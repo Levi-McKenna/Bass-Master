@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use std::collections::HashMap;
-use crate::{GameState, LevelState, NoteCollision, bass::pitch_detector::StreamReceiver, LevelScore};
+use crate::{GameState, LevelState, bass::pitch_detector::StreamReceiver, LevelScore, CurrentBassNote};
 
 #[derive(Event)]
 pub struct BassInput(bool);
@@ -18,9 +18,9 @@ pub fn state_inputs(
 }
 
 pub fn read_input_stream(
-    receiver: Res<StreamReceiver>,
     mut input_events: EventWriter<BassInput>,
-    mut collision_events: EventReader<NoteCollision>,
+    current_note: Res<CurrentBassNote>,
+    receiver: Res<StreamReceiver>,
 ) {
     // hashmap containing chord to frequency corresponding values
     let freq_to_note: HashMap<&str, [(f64, f64); 11]> = HashMap::from([
@@ -79,15 +79,12 @@ pub fn read_input_stream(
     ]);
 
     for estimate in receiver.try_iter() {
-        for collision in collision_events.iter() {
-            println!("balls");
-            let freq_bounds = freq_to_note.get(collision.chord.as_str()).unwrap();
-            if estimate >= freq_bounds[collision.fret as usize].0 && estimate <= freq_bounds[collision.fret as usize].1 {
-                println!("Chord -> {}, Fret -> {}", collision.chord, collision.fret);
-                input_events.send(BassInput(true));
-            } else {
-                input_events.send(BassInput(false));
-            }
+        let freq_bounds = freq_to_note.get(current_note.chord.as_str()).unwrap();
+        if estimate >= freq_bounds[current_note.fret as usize].0 && estimate <= freq_bounds[current_note.fret as usize].1 {
+            println!("Chord -> {}, Fret -> {}", current_note.chord, current_note.fret);
+            input_events.send(BassInput(true));
+        } else {
+            input_events.send(BassInput(false));
         }
     }
 }

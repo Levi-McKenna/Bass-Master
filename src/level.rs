@@ -4,7 +4,7 @@ use bevy::utils::Duration;
 use bevy_asset_loader::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use std::path::{Path, PathBuf};
-use crate::{WorldCamera, Bassist, GameState, WorldEvent, IntroTime, WindowScaleFactor};
+use crate::{WorldCamera, Bassist, GameState, WorldEvent, IntroTimer, WindowScaleFactor};
 
 // Marker Component
 #[derive(Component)]
@@ -116,12 +116,16 @@ pub fn level_start(
 }
 
 pub fn level_exit(
-    mut commands: Commands,
     mut change_level_state: ResMut<NextState<LevelState>>,
 ) {
     change_level_state.set(LevelState::OutOfLevel);
+}
+
+pub fn despawn_clock_time(
+    mut commands: Commands,
+) {
     commands.remove_resource::<LevelClock>();
-    commands.remove_resource::<IntroTime>();
+    commands.remove_resource::<IntroTimer>();
 }
 
 // clock systems

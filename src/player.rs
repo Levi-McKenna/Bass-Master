@@ -2,7 +2,8 @@ use bevy::prelude::*;
 use bevy_asset_loader::asset_collection::AssetCollection;
 use bevy::sprite::Anchor;
 use bevy_ecs_ldtk::prelude::*;
-use crate::{WorldCamera, LevelState, BassUI, BassNotes, BassPick, NoteState, NoteCollision, LevelClock, IntroTime, GameState};
+use std::time::Duration;
+use crate::{WorldCamera, LevelState, BassUI, BassNotes, BassPick, NoteState, NoteCollision, LevelClock, IntroTimer, GameState};
 
 #[derive(Resource, Default)]
 pub struct CurrentJumpCoord(pub usize);
@@ -12,6 +13,7 @@ pub struct JumpCoords(pub Vec<GridCoords>);
 
 #[derive(Resource)]
 pub struct FirstJumpCoord(pub GridCoords);
+
 
 #[derive(Component, Default)]
 pub struct Jump;
@@ -151,14 +153,14 @@ pub fn insert_beat_coords(
 
     for grid_coord in jump_query.iter() {
         jump_coords.0.push(*grid_coord);
-        println!("{:?}", grid_coord);
     }
 
     // wish this was a separate function but the systems scheduling is acting funny
     // 
     let bassist_transform = bassist_query.single();
     let intro_time: f32 = ((jump_coords.0[0].x as f32 * 16.) - bassist_transform.translation.x) / 250.;
-    commands.insert_resource(IntroTime(intro_time));
+/*     println!("{}", intro_time); */
+    commands.insert_resource(IntroTimer(Timer::from_seconds(intro_time, TimerMode::Once)));
     commands.insert_resource(jump_coords);
     commands.insert_resource(CurrentJumpCoord(1));
 }

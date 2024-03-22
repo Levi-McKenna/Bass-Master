@@ -15,6 +15,9 @@ pub struct QuitEvent;
 #[derive(Event)]
 pub struct ExitLevelEvent;
 
+#[derive(Event)]
+pub struct PlayEvent;
+
 // WorldEvent used to keep track of what world the player selects and is used in function
 // insert_world_dir in src/levels.rs.
 #[derive(Event)]
@@ -32,7 +35,6 @@ fn find_world_files() -> Result<Vec<String>, Box<dyn Error>> {
         let entry = entry.as_path();
         if entry.extension().is_some_and(|extension| extension == "ldtk") {
             let entry = entry.strip_prefix("./assets")?;
-            println!("{:?}", entry);
             levels.push(entry.to_str().unwrap().to_string());
         }
     }
@@ -72,6 +74,15 @@ pub fn exit_level_event(
 ) {
     for exit in exit_event.iter() {
         change_game_state.set(GameState::Ending);
+    }
+}
+
+pub fn play_event(
+    mut play_event: EventReader<PlayEvent>,
+    mut change_game_state: ResMut<NextState<GameState>>,
+) {
+    for play in play_event.iter() {
+        change_game_state.set(GameState::InGame);
     }
 }
 
@@ -135,7 +146,7 @@ pub fn draw_game_menu_ui(
         <body>
 /*             <img {logo} c:logo src="textures/Bass-Master-Logo.png" mode="fit"/> */
             <div c:game-wrapper>
-                <button on:press=toggle_play_menu c:control>
+                <button c:control on:press=|ctx| ctx.send_event(PlayEvent)>
                     <img {play} c:image src="textures/Play-Logo.png" mode="fit"/>
                 </button>
                 <button c:control>

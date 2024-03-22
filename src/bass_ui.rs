@@ -8,7 +8,8 @@ use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
-use crate::{WorldCamera, LevelState, CurrentJumpCoord, JumpCoords, LevelResource, LevelClock, Bassist, LevelScore};
+use std::time::Duration;
+use crate::{WorldCamera, LevelState, CurrentJumpCoord, JumpCoords, LevelResource, LevelClock, Bassist, LevelScore, CurrentBassNote};
 
 #[derive(Event)]
 pub struct NoteCollision {
@@ -62,7 +63,7 @@ pub struct MusicJson {
 }
 
 #[derive(Resource)]
-pub struct IntroTime(pub f32);
+pub struct IntroTimer(pub Timer);
 
 #[derive(Component)]
 pub struct BassString(String);
@@ -315,6 +316,7 @@ pub fn despawn_bass_ui(
 pub fn write_note_collision(
     mut commands: Commands,
     mut writer: EventWriter<NoteCollision>,
+    mut current_note: ResMut<CurrentBassNote>,
     bass_note_query: Query<(&Transform, &BassNotes, Entity)>,
     pick_query: Query<&Transform, (With<BassPick>, Without<BassNotes>)>,
 ) {
@@ -324,6 +326,10 @@ pub fn write_note_collision(
         if bass_note_transform.translation.x <= pick_transform.translation.x &&
         bass_note_transform.translation.x >= pick_transform.translation.x - 5. {
             writer.send(NoteCollision { chord: bass_note.chord.clone(), fret: bass_note.fret });
+            *current_note = CurrentBassNote {
+                chord: bass_note.chord.clone(),
+                fret: bass_note.fret,
+            };
             commands.entity(entity).despawn_recursive();
         }
     }
@@ -333,26 +339,25 @@ pub fn write_note_collision(
 pub fn translate_bass_notes(
     mut bass_note_query: Query<(&mut Transform, &mut Visibility, &BassNotes), (With<BassNotes>, Without<BassPick>)>,
     level_state: Res<State<LevelState>>,
-    intro_time: Res<IntroTime>,
+    mut intro_timer: ResMut<IntroTimer>,
     pick_query: Query<&Transform, (With<BassPick>, Without<BassNotes>)>,
     mut audio_query: Query<&AudioSink>,
     mut change_note_state: ResMut<NextState<NoteState>>,
     mut writer: EventWriter<NoteCollision>,
     tablature: Res<MusicJson>,
-    time: Res<LevelClock>,
+    mut time: ResMut<LevelClock>,
 ) {
     let pick_transform = pick_query.single();
     let mut audio_settings = audio_query.single_mut();
 
+    intro_timer.0.tick(time.0.delta());
     for (mut bass_note_transform, mut bass_note_visibility, note) in &mut bass_note_query {
         // check to see if translations are needed
         if bass_note_transform.translation.x + NOTE_WIDTH <= HORIZONTAL_BASS_WIDTH {
             *bass_note_visibility = Visibility::Visible;
         }
 
-        if time.0.elapsed_seconds() <= intro_time.0 {
-            bass_note_transform.translation.x -= (HORIZONTAL_BASS_WIDTH + NOTE_WIDTH) * (time.0.delta_seconds() / intro_time.0);
-        } else {
+        if intro_timer.0.finished()  {
             // unpause song if needed
             if audio_settings.is_paused() {
                 audio_settings.play();
@@ -366,6 +371,9 @@ pub fn translate_bass_notes(
                 speed_scale = note_speed_manipulation(tablature.NoteValue, tablature.BPM, tablature.NoteValue);
             }
             bass_note_transform.translation.x -= (NOTE_WIDTH + NOTE_OFFSET) * (time.0.delta_seconds() / speed_scale);
+        } else {
+            bass_note_transform.translation.x -= (HORIZONTAL_BASS_WIDTH) * (time.0.delta_seconds() / intro_timer.0.duration().as_secs_f32());
+/*             println!("Elapsed -> {}, Intro Time -> {}", time.0.elapsed_seconds(), intro_time.0); */
         }
     }
 }
