@@ -46,6 +46,7 @@ pub struct BassPick;
 pub struct ScoreUI;
 
 // structs
+#[allow(non_snake_case)]
 #[derive(Deserialize, Debug, Resource)]
 pub struct Note {
     String: String,
@@ -53,6 +54,7 @@ pub struct Note {
     Note: i8,
 }
 
+#[allow(non_snake_case)]
 #[derive(Deserialize, Debug, Resource)]
 pub struct MusicJson {
     BPM: i16,
