@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy::utils::Instant;
+
 use bevy_asset_loader::prelude::*;
 use std::path::{PathBuf};
 use crate::{LevelResource};
@@ -50,7 +50,7 @@ pub fn despawn_music(
 pub fn pause_song(
     mut song_settings_query: Query<&AudioSink>,
 ) {
-    let mut song_settings = song_settings_query.single_mut();
+    let song_settings = song_settings_query.single_mut();
     song_settings.pause();
 }
 

@@ -1,13 +1,13 @@
 use bevy::prelude::*;
 use std::collections::HashMap;
-use crate::{GameState, LevelState, bass::pitch_detector::StreamReceiver, LevelScore, CurrentBassNote};
+use crate::{GameState, bass::pitch_detector::StreamReceiver, LevelScore, CurrentBassNote};
 
 #[derive(Event)]
 pub struct BassInput(bool);
 
 pub fn state_inputs(
     input: Res<Input<KeyCode>>,
-    mut game_state: ResMut<State<GameState>>,
+    game_state: ResMut<State<GameState>>,
     mut change_game_state: ResMut<NextState<GameState>>,
 ) {
     if input.just_pressed(KeyCode::Escape) && game_state.get() == &GameState::InGame {
@@ -87,6 +87,7 @@ pub fn read_input_stream(
             input_events.send(BassInput(false));
         }
     }
+    println!("Yeah we reading it");
 }
 
 pub fn print_if_true(

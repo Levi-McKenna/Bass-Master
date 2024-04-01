@@ -153,7 +153,7 @@ fn main() {
         .add_systems(OnEnter(GameState::AssetLoading), (insert_level_metadata, spawn_load_screen))
         .add_systems(OnExit(GameState::AssetLoading), (spawn_score, spawn_music, spawn_bass_ui, spawn_character, load_world))
         // all systems for pre-level start
-        .add_systems(OnEnter(GameState::AssetsLoaded), (set_player_bounds))
+        .add_systems(OnEnter(GameState::AssetsLoaded), set_player_bounds)
         .add_systems(Update, exit_load_screen.run_if(in_state(GameState::AssetsLoaded)))
         .add_systems(OnExit(GameState::AssetsLoaded), (fit_camera_to_window, spawn_bass_notes, insert_beat_coords))
         // MainMenu systems
@@ -161,20 +161,20 @@ fn main() {
         .add_systems(Update, (fit_camera_to_window, handle_level_camera_translations).run_if(in_state(GameState::MainMenu)))
         .add_systems(OnExit(GameState::MainMenu), (despawn_character, despawn_world)) */
         // InGame systems
-        .add_systems(OnEnter(GameState::InGame), (read_audiostream, level_start, unpause_game_clock))
-        .add_systems(Update, (translate_bass_notes, update_level_clock).run_if(in_state(GameState::InGame)))
-        .add_systems(Update, (player_movement, read_input_stream, print_if_true, write_note_collision).run_if(in_state(GameState::InGame)))
-        .add_systems(Update, (game_state_end, update_score, manage_level_states, handle_level_camera_translations).run_if(in_state(GameState::InGame)))
+        .add_systems(OnEnter(GameState::InGame), (level_start, unpause_game_clock))
+        // run these systems before movement
+        .add_systems(Update, (manage_level_states).before(player_movement).run_if(in_state(GameState::InGame)))
+        .add_systems(Update, (manage_level_states, player_movement, read_input_stream, print_if_true, write_note_collision).run_if(in_state(GameState::InGame)))
+        .add_systems(Update, (game_state_end, update_score, handle_level_camera_translations, translate_bass_notes, update_level_clock).run_if(in_state(GameState::InGame)))
         .add_systems(OnExit(GameState::InGame), (pause_level_clock, pause_game_clock))
-/*         .add_systems(OnExit(GameState::InGame), (despawn_world, despawn_character)) */
         // GameState::Paused 
         .add_systems(OnEnter(GameState::Paused), (draw_game_menu_ui, pause_song))
         .add_systems(Update, (exit_level_event, play_event).run_if(in_state(GameState::Paused)))
-        .add_systems(OnExit(GameState::Paused), (despawn_ui))
+        .add_systems(OnExit(GameState::Paused), despawn_ui)
         // GameState::Ending
         .add_systems(OnEnter(GameState::Ending), (despawn_clock_time, despawn_world, despawn_character, despawn_bass_ui, despawn_music, reset_camera, level_exit, reset_score, despawn_score).before(load_main_menu))
         .add_systems(Update, (load_main_menu).run_if(in_state(GameState::Ending)))
-        .add_systems(Startup, (set_window_icon, setup))
+        .add_systems(Startup, (set_window_icon, setup, read_audiostream))
         .add_systems(Update, state_inputs)
         .run();
 }

@@ -8,8 +8,8 @@ use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
-use std::time::Duration;
-use crate::{WorldCamera, LevelState, CurrentJumpCoord, JumpCoords, LevelResource, LevelClock, Bassist, LevelScore, CurrentBassNote};
+
+use crate::{LevelState, LevelResource, LevelClock, LevelScore, CurrentBassNote};
 
 #[derive(Event)]
 pub struct NoteCollision {
@@ -175,7 +175,7 @@ const INTRODUCTION_LENGTH_SECONDS: f32 = 4.;
 pub fn spawn_bass_ui(
     mut commands: Commands,
     bass_pick_asset: Res<BassPickAsset>,
-    bass_note_assets: Res<BassNoteAssets>,
+    _bass_note_assets: Res<BassNoteAssets>,
     vertical_bass_strum_asset: Res<VerticalBassStrumAsset>,
     bass_string_asset: Res<BassStringAsset>,
 )  {
@@ -250,14 +250,14 @@ pub fn insert_level_metadata(
 
 pub fn spawn_bass_notes(
     mut commands: Commands,
-    string_query: Query<(&Parent, &Transform, &BassString), (With<Handle<TextureAtlas>>)>,
+    string_query: Query<(&Parent, &Transform, &BassString), With<Handle<TextureAtlas>>>,
     fret_number_assets: Res<FretNumberAssets>,
     bass_note_assets: Res<BassNoteAssets>,
     tablature: Res<MusicJson>,
 ) {
     let mut position_x = 0.;
 
-    for (note) in &tablature.Notes {
+    for note in &tablature.Notes {
         for (parent, string_transform, string_letter) in string_query.iter() {
             // check for the correct string
             if note.String == string_letter.0 {
@@ -340,17 +340,17 @@ pub fn write_note_collision(
 
 pub fn translate_bass_notes(
     mut bass_note_query: Query<(&mut Transform, &mut Visibility, &BassNotes), (With<BassNotes>, Without<BassPick>)>,
-    level_state: Res<State<LevelState>>,
+    _level_state: Res<State<LevelState>>,
     mut intro_timer: ResMut<IntroTimer>,
     pick_query: Query<&Transform, (With<BassPick>, Without<BassNotes>)>,
     mut audio_query: Query<&AudioSink>,
-    mut change_note_state: ResMut<NextState<NoteState>>,
-    mut writer: EventWriter<NoteCollision>,
+    _change_note_state: ResMut<NextState<NoteState>>,
+    _writer: EventWriter<NoteCollision>,
     tablature: Res<MusicJson>,
-    mut time: ResMut<LevelClock>,
+    time: ResMut<LevelClock>,
 ) {
     let pick_transform = pick_query.single();
-    let mut audio_settings = audio_query.single_mut();
+    let audio_settings = audio_query.single_mut();
 
     intro_timer.0.tick(time.0.delta());
     for (mut bass_note_transform, mut bass_note_visibility, note) in &mut bass_note_query {
@@ -365,7 +365,7 @@ pub fn translate_bass_notes(
                 audio_settings.play();
             }
 
-            let mut speed_scale: f32;
+            let speed_scale: f32;
             if bass_note_transform.translation.x <= pick_transform.translation.x ||
             bass_note_transform.translation.x - NOTE_OFFSET <= pick_transform.translation.x {
                 speed_scale = note.speed_manipulation;
@@ -465,7 +465,7 @@ pub fn update_score(
     score: Res<LevelScore>,
 ) {
     let mut sections = text_query.single_mut();
-    for mut section in sections.sections.iter_mut() {
+    for section in sections.sections.iter_mut() {
         section.value = score.0.to_string();
     }
 }

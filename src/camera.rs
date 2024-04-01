@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
-use bevy::render::camera::ScalingMode;
+
 use crate::{WorldCamera, Bassist, LevelState};
 
 #[derive(Resource)]
@@ -11,12 +11,12 @@ pub struct WindowScaleFactor(pub f32);
 pub fn fit_camera_to_window (
     mut commands: Commands,
     mut camera_query: Query<(&mut bevy::render::camera::OrthographicProjection, &mut Transform), With<WorldCamera>>,
-    level_query: Query<(&Handle<LdtkLevel>), (Without<Bassist>, Without<WorldCamera>)>,
+    level_query: Query<&Handle<LdtkLevel>, (Without<Bassist>, Without<WorldCamera>)>,
     window_query: Query<&Window>,
     ldtk_levels: Res<Assets<LdtkLevel>>,
 ) {
     for (mut projection, mut camera_transform) in camera_query.iter_mut() {
-        for (level_handle) in level_query.iter(){
+        for level_handle in level_query.iter(){
             if let Some(ldtk_level) = ldtk_levels.get(level_handle) {
                 let window = window_query.single();
                 let level = &ldtk_level.level;
@@ -43,7 +43,7 @@ pub fn fit_camera_to_window (
 
 pub fn handle_level_camera_translations(
     mut camera_query: Query<&mut Transform, With<WorldCamera>>,
-    level_query: Query<(&Handle<LdtkLevel>), (Without<Bassist>, Without<WorldCamera>)>,
+    level_query: Query<&Handle<LdtkLevel>, (Without<Bassist>, Without<WorldCamera>)>,
     window_query: Query<&Window>,
     ldtk_levels: Res<Assets<LdtkLevel>>,
     level_state: Res<State<LevelState>>,

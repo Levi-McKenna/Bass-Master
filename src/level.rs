@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 use bevy::utils::Instant;
-use bevy::utils::Duration;
+
 use bevy_asset_loader::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
 use std::path::{Path, PathBuf};
@@ -66,7 +66,7 @@ pub fn load_world(
 pub fn manage_level_states(
     camera_query: Query<&Transform, With<WorldCamera>>,
     character_query: Query<&Transform, (With<Bassist>, Without<WorldCamera>)>,
-    level_query: Query<(&Handle<LdtkLevel>), (Without<Bassist>, Without<WorldCamera>)>,
+    level_query: Query<&Handle<LdtkLevel>, (Without<Bassist>, Without<WorldCamera>)>,
     window_query: Query<&Window>,
     ldtk_levels: Res<Assets<LdtkLevel>>,
     mut change_level_state: ResMut<NextState<LevelState>>,
@@ -99,7 +99,7 @@ pub fn manage_level_states(
 
 pub fn despawn_world(
     mut commands: Commands,
-    level_query: Query<Entity, (With<Handle<LdtkAsset>>)>,
+    level_query: Query<Entity, With<Handle<LdtkAsset>>>,
 ) {
     level_query.for_each(|entity| {
         commands.entity(entity).despawn_recursive();

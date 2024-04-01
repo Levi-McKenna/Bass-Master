@@ -1,5 +1,5 @@
 use bevy::prelude::*;
-use bevy_ecs_ldtk::prelude::*;
+
 use bevy::app::AppExit;
 use belly::prelude::*;
 use std::fs;
@@ -62,7 +62,7 @@ pub fn close_event(
     mut exit: EventWriter<AppExit>,
     mut quit_event: EventReader<QuitEvent>,
 ) {
-    for quit in quit_event.iter() {
+    for _quit in quit_event.iter() {
         exit.send(AppExit);
     }
 }
@@ -72,7 +72,7 @@ pub fn exit_level_event(
     mut exit_event: EventReader<ExitLevelEvent>,
     mut change_game_state: ResMut<NextState<GameState>>, 
 ) {
-    for exit in exit_event.iter() {
+    for _exit in exit_event.iter() {
         change_game_state.set(GameState::Ending);
     }
 }
@@ -81,7 +81,7 @@ pub fn play_event(
     mut play_event: EventReader<PlayEvent>,
     mut change_game_state: ResMut<NextState<GameState>>,
 ) {
-    for play in play_event.iter() {
+    for _play in play_event.iter() {
         change_game_state.set(GameState::InGame);
     }
 }
@@ -135,10 +135,10 @@ pub fn draw_main_menu_ui(
 pub fn draw_game_menu_ui(
     mut commands: Commands,
 ) {
-    let logo = commands.spawn_empty().id();
+    let _logo = commands.spawn_empty().id();
     let play = commands.spawn_empty().id();
     let settings = commands.spawn_empty().id();
-    let quit = commands.spawn_empty().id();
+    let _quit = commands.spawn_empty().id();
     let exit = commands.spawn_empty().id();
 
     commands.add(StyleSheet::load("stylesheets/Bass.ess"));

@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_asset_loader::asset_collection::AssetCollection;
 use bevy::sprite::Anchor;
 use bevy_ecs_ldtk::prelude::*;
-use std::time::Duration;
+
 use crate::{WorldCamera, LevelState, BassUI, BassNotes, BassPick, NoteState, NoteCollision, LevelClock, IntroTimer, GameState};
 
 #[derive(Resource, Default)]
@@ -84,7 +84,7 @@ pub fn despawn_character(
 }
 
 pub fn set_player_bounds(
-    mut character_query: Query<(&mut Transform), With<Bassist>>
+    mut character_query: Query<&mut Transform, With<Bassist>>
 ) {
     let mut character_transform = character_query.single_mut();
     character_transform.translation.x = -100.0;
@@ -103,31 +103,31 @@ pub fn player_movement(
     mut camera_query: Query<&mut Transform, (Without<BassNotes>, Without<BassPick>, With<WorldCamera>, Without<Bassist>)>,
     mut string_query: Query<&mut Transform, (Without<BassNotes>, Without<BassPick>, Without<WorldCamera>, Without<Bassist>, With<BassUI>)>,
     mut note_collision_event: EventReader<NoteCollision>,
-    input: Res<Input<KeyCode>>,
+    _input: Res<Input<KeyCode>>,
     level_state: Res<State<LevelState>>,
     mut grid_coord_index: ResMut<CurrentJumpCoord>,
     grid_coords: Res<JumpCoords>,
-    note_state: Res<State<NoteState>>,
+    _note_state: Res<State<NoteState>>,
     mut time: ResMut<LevelClock>,
 ) {
     time.0.unpause();
     // move camera and player + increment the picks tanslation
-    for (mut character_transform, mut bassist) in character_query.iter_mut() {
+    for (mut character_transform, _bassist) in character_query.iter_mut() {
         // extra query response handles
 
         let mut camera_transform = camera_query.single_mut();
         let mut string_transform = string_query.single_mut();
 
-        let mut direction = Vec3::ZERO;
+        let _direction = Vec3::ZERO;
         let mut position_x: f32 = PLAYER_SPEED * time.0.delta_seconds();
         let mut position_y: f32 = character_transform.translation.y;
 
         let jump_grid_xy = ((grid_coords.0[grid_coord_index.0].x as f32 * 16.), (grid_coords.0[grid_coord_index.0].y as f32 * 16.));
-        for collision_event in note_collision_event.iter() {
+        for _collision_event in note_collision_event.iter() {
             if character_transform.translation.x >= grid_coords.0[grid_coord_index.0].x as f32 {
                 // position_x is for translating the dependents (i.e. camera and bass_ui)
-                position_x = (jump_grid_xy.0 - character_transform.translation.x + 8.);
-                position_y = (jump_grid_xy.1 + 8.);
+                position_x = jump_grid_xy.0 - character_transform.translation.x + 8.;
+                position_y = jump_grid_xy.1 + 8.;
                 if grid_coord_index.0 < grid_coords.0.len() - 1 {
                     grid_coord_index.0 += 1;
                 }
@@ -166,7 +166,7 @@ pub fn insert_beat_coords(
 }
 
 pub fn game_state_end(
-    mut camera_query: Query<&Transform, With<WorldCamera>>,
+    camera_query: Query<&Transform, With<WorldCamera>>,
     bassist_query: Query<&Transform, With<Bassist>>,
     window_query: Query<&Window>,
     mut change_game_state: ResMut<NextState<GameState>>,

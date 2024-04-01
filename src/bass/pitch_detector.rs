@@ -1,14 +1,14 @@
 use bevy::prelude::*;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use cpal::*;
+
 use pitch_detection::detector::mcleod::McLeodDetector;
 use pitch_detection::detector::PitchDetector;
 use ringbuf::*;
-use ringbuf::ring_buffer::{RbRead, RbRef, RbWrite};
+
 use crossbeam_channel::{bounded, Receiver};
 use std::thread;
-use std::time::Duration;
-use crate::{NoteCollision};
+
+
 
 /* pub fn setup_audiostream() {
     let host = cpal::default_host();
@@ -78,11 +78,10 @@ pub fn read_audiostream(
                                 tx.send(estimate.frequency).unwrap();
                                 println!("Estimated Frequency: {}", estimate.frequency);
                             }
-                        } else {
                         }
                         consumer.clear();
                     } else {
-                        let index_num = producer.push_slice(input);
+                        let _index_num = producer.push_slice(input);
                     }
                 },
                 err_fn,
@@ -95,5 +94,5 @@ pub fn read_audiostream(
     });
 
     commands.insert_resource(StreamReceiver(rx));
+    println!("Reading Audio Stream");
 }
-
