@@ -1,44 +1,10 @@
 use bevy::prelude::*;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-
 use pitch_detection::detector::mcleod::McLeodDetector;
 use pitch_detection::detector::PitchDetector;
 use ringbuf::*;
-
 use crossbeam_channel::{bounded, Receiver};
 use std::thread;
-
-
-
-/* pub fn setup_audiostream() {
-    let host = cpal::default_host();
-    let device = host
-        .default_input_device()
-        .expect("failed to find input device");
-    let config = device.default_input_config().unwrap();
-    println!("{:?}", config.buffer_size());
-    match config.sample_format() {
-        cpal::SampleFormat::F32 => run::<f32>(device, config.into()),
-        cpal::SampleFormat::I16 => run::<i16>(device, config.into()),
-        cpal::SampleFormat::U16 => run::<u16>(device, config.into()),
-        _ => todo!(),
-    }
-} */
-
-/* #[derive(Event)]
-pub struct ChordFret {
-    chord: String,
-    fret: i8,
-}
-
-impl ChordFret {
-    pub fn new(chord: &str, fret: i8) -> ChordFret {
-        ChordFret {
-            chord: chord.to_string(),
-            fret: fret
-        }
-    }
-} */
 
 #[derive(Resource, Deref)]
 pub struct StreamReceiver(Receiver<f64>);

@@ -87,7 +87,6 @@ pub fn read_input_stream(
             input_events.send(BassInput(false));
         }
     }
-    println!("Yeah we reading it");
 }
 
 pub fn print_if_true(

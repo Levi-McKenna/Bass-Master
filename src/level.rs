@@ -135,12 +135,6 @@ pub fn update_level_clock(
     clock.0.update();
 }
 
-pub fn unpause_level_clock(
-    mut clock: ResMut<LevelClock>,
-) {
-    clock.0.unpause();
-}
-
 pub fn pause_level_clock(
     mut clock: ResMut<LevelClock>,
 ) {

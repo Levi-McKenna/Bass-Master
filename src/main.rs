@@ -1,12 +1,10 @@
 mod player;
 mod level;
 mod input;
-mod menu;
-mod load_screen;
 mod camera;
-mod bass_ui;
-mod song;
 mod bass;
+mod song;
+mod ui;
 
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
@@ -18,15 +16,16 @@ use belly::prelude::*;
 use bevy::window::WindowMode;
 use bevy::winit::WinitWindows;
 use winit::window::Icon;
-use player::*;
-use level::*;
-use menu::*;
-use input::*;
-use load_screen::*;
-use camera::*;
-use bass_ui::*;
-use song::*;
-use bass::pitch_detector::*;
+use crate::player::*;
+use crate::level::*;
+use crate::input::*;
+use crate::camera::*;
+use crate::ui::menu::*;
+use crate::ui::bass_ui::*;
+use crate::ui::load_screen::*;
+use crate::ui::score::*;
+use crate::song::*;
+use crate::bass::pitch_detector::*;
 
 // States for game status
 #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
@@ -174,7 +173,7 @@ fn main() {
         // GameState::Ending
         .add_systems(OnEnter(GameState::Ending), (despawn_clock_time, despawn_world, despawn_character, despawn_bass_ui, despawn_music, reset_camera, level_exit, reset_score, despawn_score).before(load_main_menu))
         .add_systems(Update, (load_main_menu).run_if(in_state(GameState::Ending)))
-        .add_systems(Startup, (set_window_icon, setup, read_audiostream))
+        .add_systems(Startup, (spawn_count_in, set_window_icon, setup, read_audiostream))
         .add_systems(Update, state_inputs)
         .run();
 }

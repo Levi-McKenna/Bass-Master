@@ -3,16 +3,13 @@ use bevy_asset_loader::asset_collection::AssetCollection;
 use bevy::sprite::Anchor;
 use bevy_ecs_ldtk::prelude::*;
 
-use crate::{WorldCamera, LevelState, BassUI, BassNotes, BassPick, NoteState, NoteCollision, LevelClock, IntroTimer, GameState};
+use crate::{WorldCamera, LevelState, BassUI, NoteComponent, BassPick, NoteState, NoteCollision, LevelClock, IntroTimer, GameState};
 
 #[derive(Resource, Default)]
 pub struct CurrentJumpCoord(pub usize);
 
 #[derive(Resource)]
 pub struct JumpCoords(pub Vec<GridCoords>);
-
-#[derive(Resource)]
-pub struct FirstJumpCoord(pub GridCoords);
 
 
 #[derive(Component, Default)]
@@ -90,18 +87,12 @@ pub fn set_player_bounds(
     character_transform.translation.x = -100.0;
 }
 
-/* fn spawn_particles(
-    mut commands: Commands,
-) {
-    
-} */
-
 const PLAYER_SPEED: f32 = 250.0;
 
 pub fn player_movement(
     mut character_query: Query<(&mut Transform, &mut Bassist), Without<WorldCamera>>,
-    mut camera_query: Query<&mut Transform, (Without<BassNotes>, Without<BassPick>, With<WorldCamera>, Without<Bassist>)>,
-    mut string_query: Query<&mut Transform, (Without<BassNotes>, Without<BassPick>, Without<WorldCamera>, Without<Bassist>, With<BassUI>)>,
+    mut camera_query: Query<&mut Transform, (Without<NoteComponent>, Without<BassPick>, With<WorldCamera>, Without<Bassist>)>,
+    mut string_query: Query<&mut Transform, (Without<NoteComponent>, Without<BassPick>, Without<WorldCamera>, Without<Bassist>, With<BassUI>)>,
     mut note_collision_event: EventReader<NoteCollision>,
     _input: Res<Input<KeyCode>>,
     level_state: Res<State<LevelState>>,

@@ -1,7 +1,6 @@
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 use bevy::sprite::Anchor;
-use belly::prelude::*;
 use serde::Deserialize;
 use std::ops::Index;
 use std::error::Error;
@@ -9,7 +8,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
-use crate::{LevelState, LevelResource, LevelClock, LevelScore, CurrentBassNote};
+use crate::{LevelState, LevelResource, LevelClock, CurrentBassNote};
 
 #[derive(Event)]
 pub struct NoteCollision {
@@ -29,11 +28,10 @@ pub enum NoteState {
 pub struct BassUI;
 
 #[derive(Component)]
-pub struct BassNotes { 
-    note: i8,
-    fret: i8,
+pub struct NoteComponent {
     chord: String,
-    speed_manipulation: f32,
+    fret: i8,
+    note: i8,
 }
 
 #[derive(Component)]
@@ -43,12 +41,11 @@ pub struct BassFrets;
 pub struct BassPick;
 
 #[derive(Component)]
-pub struct ScoreUI;
+pub struct CountInUI;
 
-// structs
 #[allow(non_snake_case)]
 #[derive(Deserialize, Debug, Resource)]
-pub struct Note {
+pub struct NoteResource {
     String: String,
     Fret: i8,
     Note: i8,
@@ -61,7 +58,32 @@ pub struct MusicJson {
     Duration: f32,
     Beats: i8,
     NoteValue: i8,
-    Notes: Vec<Note>,
+    Notes: Vec<NoteResource>,
+}
+
+impl MusicJson {
+    pub fn parse_new<P: AsRef<Path>>(path: P) -> Result<MusicJson, Box<dyn Error>> {
+        let json_file = File::open(path)?;
+        let reader = BufReader::new(json_file);
+        // read JSON contents
+        let tablature = serde_json::from_reader(reader)?;
+
+        Ok(tablature)
+    }
+
+    pub fn speed_manipulation(&self, note: Option<i8>) -> f32 {
+        // scale for the beats per minute
+        let bottom_value;
+        match note {
+            Some(note) => bottom_value = (note / self.NoteValue) as i16 * self.BPM,
+            None => bottom_value = self.BPM,
+        }
+
+        // (https://dobrian.github.io/cmp/topics/basics-of-music-theory/6.representing-rhythm.html#:~:text=At%20quarter%20%3D%2060%2C%20each%20quarter,seconds%20long%2C%20or%202000%20milliseconds) for more info about this equation
+        let note_length: f32 = 60000. / bottom_value as f32;
+        // scale for seconds
+        note_length / 1000.
+    }
 }
 
 #[derive(Resource)]
@@ -170,7 +192,6 @@ const HORIZONTAL_BASS_WIDTH: f32 = 450.;
 const VERTICAL_BASS_HEIGHT: f32 = 50.;
 const NOTE_WIDTH: f32 = 10.;
 const NOTE_OFFSET: f32 = 10.;
-const INTRODUCTION_LENGTH_SECONDS: f32 = 4.;
 
 pub fn spawn_bass_ui(
     mut commands: Commands,
@@ -245,7 +266,7 @@ pub fn insert_level_metadata(
     level_path.set_extension("json");
     let level_path = format!("./assets/{}", level_path.to_str().unwrap());
 
-    commands.insert_resource(parse_bass_json(level_path).unwrap());
+    commands.insert_resource(MusicJson::parse_new(level_path).unwrap());
 }
 
 pub fn spawn_bass_notes(
@@ -277,11 +298,10 @@ pub fn spawn_bass_notes(
                         },
                         ..default()
                     },
-                    BassNotes { 
-                        note: note.Note,
-                        fret: note.Fret,
+                    NoteComponent {
                         chord: note.String.clone(),
-                        speed_manipulation: note_speed_manipulation(note.Note, tablature.BPM, tablature.NoteValue), 
+                        fret: note.Fret,
+                        note: note.Note,
                     }
                 )).with_children(|parent| {
                         parent.spawn((
@@ -298,8 +318,6 @@ pub fn spawn_bass_notes(
                             BassFrets
                         ));
                     }).set_parent(parent.get());
-
-                // Fret number spawns
             }
         }
         position_x += NOTE_OFFSET;
@@ -319,8 +337,8 @@ pub fn write_note_collision(
     mut commands: Commands,
     mut writer: EventWriter<NoteCollision>,
     mut current_note: ResMut<CurrentBassNote>,
-    bass_note_query: Query<(&Transform, &BassNotes, Entity)>,
-    pick_query: Query<&Transform, (With<BassPick>, Without<BassNotes>)>,
+    bass_note_query: Query<(&Transform, &NoteComponent, Entity)>,
+    pick_query: Query<&Transform, (With<BassPick>, Without<NoteComponent>)>,
 ) {
     let pick_transform = pick_query.single();
 
@@ -339,13 +357,10 @@ pub fn write_note_collision(
 
 
 pub fn translate_bass_notes(
-    mut bass_note_query: Query<(&mut Transform, &mut Visibility, &BassNotes), (With<BassNotes>, Without<BassPick>)>,
-    _level_state: Res<State<LevelState>>,
+    mut bass_note_query: Query<(&mut Transform, &mut Visibility, &NoteComponent), (With<NoteComponent>, Without<BassPick>)>,
     mut intro_timer: ResMut<IntroTimer>,
-    pick_query: Query<&Transform, (With<BassPick>, Without<BassNotes>)>,
     mut audio_query: Query<&AudioSink>,
-    _change_note_state: ResMut<NextState<NoteState>>,
-    _writer: EventWriter<NoteCollision>,
+    pick_query: Query<&Transform, (With<BassPick>, Without<NoteComponent>)>,
     tablature: Res<MusicJson>,
     time: ResMut<LevelClock>,
 ) {
@@ -368,39 +383,15 @@ pub fn translate_bass_notes(
             let speed_scale: f32;
             if bass_note_transform.translation.x <= pick_transform.translation.x ||
             bass_note_transform.translation.x - NOTE_OFFSET <= pick_transform.translation.x {
-                speed_scale = note.speed_manipulation;
+                speed_scale = tablature.speed_manipulation(Some(note.note));
             } else {
-                speed_scale = note_speed_manipulation(tablature.NoteValue, tablature.BPM, tablature.NoteValue);
+                speed_scale = tablature.speed_manipulation(None);
             }
             bass_note_transform.translation.x -= (NOTE_WIDTH + NOTE_OFFSET) * (time.0.delta_seconds() / speed_scale);
         } else {
             bass_note_transform.translation.x -= (HORIZONTAL_BASS_WIDTH) * (time.0.delta_seconds() / intro_timer.0.duration().as_secs_f32());
-/*             println!("Elapsed -> {}, Intro Time -> {}", time.0.elapsed_seconds(), intro_time.0); */
         }
     }
-}
-
-fn note_speed_manipulation(
-    note: i8,
-    bpm: i16,
-    note_value: i8,
-) -> f32 {
-    // scale for the beats per minute
-    let bottom_value = (note / note_value) as i16 * bpm;
-
-    // (https://dobrian.github.io/cmp/topics/basics-of-music-theory/6.representing-rhythm.html#:~:text=At%20quarter%20%3D%2060%2C%20each%20quarter,seconds%20long%2C%20or%202000%20milliseconds) for more info about this equation
-    let note_length: f32 = 60000. / bottom_value as f32;
-    // scale for seconds
-    note_length / 1000.
-}
-
-fn parse_bass_json<P: AsRef<Path>>(path: P) -> Result<MusicJson, Box<dyn Error>> {
-    let json_file = File::open(path)?;
-    let reader = BufReader::new(json_file);
-    // read JSON contents
-    let tablature = serde_json::from_reader(reader)?;
-
-    Ok(tablature)
 }
 
 /* // This is for managing the note state that controls the type of player movement in player.rs.
@@ -425,56 +416,35 @@ pub fn manage_note_state(
     }
 } */
 
-pub fn spawn_score(
+pub fn spawn_count_in(
     mut commands: Commands,
 ) {
-    // scorespawn
     commands.spawn((
         NodeBundle {
             style: Style {
                 width: Val::Percent(100.0),
                 height: Val::Percent(100.0),
                 position_type: PositionType::Absolute,
-                justify_content: JustifyContent::End,
-                align_items: AlignItems::Start,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
                 ..default()
             },
             ..default()
         },
-        ScoreUI,
     )).with_children(|parent| {
             parent.spawn((TextBundle {
                 text: Text::from_section(
-                    "0",
+                    "1",
                     TextStyle {
-                        font_size: 60.0,
-                        color: Color::rgba(0., 0.9098039215686274, 1., 1.),
+                        font_size: 480.0,
+                        color: Color::rgba(1., 1., 1., 0.5),
                         ..default()
                     }
                 ),
                 ..default()
             }.with_style(Style {
-                 ..default()   
-            }),
-            Label));
-    });
-}
-
-pub fn update_score(
-    mut text_query: Query<&mut Text>,
-    score: Res<LevelScore>,
-) {
-    let mut sections = text_query.single_mut();
-    for section in sections.sections.iter_mut() {
-        section.value = score.0.to_string();
-    }
-}
-
-pub fn despawn_score(
-    mut commands: Commands,
-    score_query: Query<Entity, With<ScoreUI>>,
-) {
-    for score in score_query.iter() {
-        commands.entity(score).despawn_recursive();
-    }
+                    ..default()   
+                }),
+                CountInUI));
+        });
 }

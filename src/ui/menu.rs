@@ -1,11 +1,10 @@
 use bevy::prelude::*;
-
 use bevy::app::AppExit;
 use belly::prelude::*;
 use std::fs;
 use std::error::Error;
 use std::path::Path;
-use crate::{GameState};
+use crate::GameState;
 
 // QuitEvent used in later function, close_event.
 #[derive(Event)]
