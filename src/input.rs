@@ -79,8 +79,20 @@ pub fn read_input_stream(
     ]);
 
     for estimate in receiver.try_iter() {
-        let freq_bounds = freq_to_note.get(current_note.chord.as_str()).unwrap();
-        if estimate >= freq_bounds[current_note.fret as usize].0 && estimate <= freq_bounds[current_note.fret as usize].1 {
+        let freq_bounds = freq_to_note.get(current_note.chord.as_str()).unwrap_or(&[
+            (0., 0.),
+            (0., 0.),
+            (0., 0.),
+            (0., 0.),
+            (0., 0.),
+            (0., 0.),
+            (0., 0.),
+            (0., 0.),
+            (0., 0.),
+            (0., 0.),
+            (0., 0.),
+        ]);
+        if (current_note.fret < 11 && current_note.fret > -1) && estimate >= freq_bounds[current_note.fret as usize].0 && estimate <= freq_bounds[current_note.fret as usize].1 {
             println!("Chord -> {}, Fret -> {}", current_note.chord, current_note.fret);
             input_events.send(BassInput(true));
         } else {

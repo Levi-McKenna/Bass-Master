@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_asset_loader::asset_collection::AssetCollection;
 use bevy::sprite::Anchor;
 use bevy_ecs_ldtk::prelude::*;
-
+use crate::animations::spawn_exit_animation;
 use crate::{WorldCamera, LevelState, BassUI, NoteComponent, BassPick, NoteState, NoteCollision, LevelClock, IntroTimer, GameState};
 
 #[derive(Resource, Default)]
@@ -90,15 +90,15 @@ pub fn set_player_bounds(
 const PLAYER_SPEED: f32 = 250.0;
 
 pub fn player_movement(
+    mut commands: Commands,
     mut character_query: Query<(&mut Transform, &mut Bassist), Without<WorldCamera>>,
     mut camera_query: Query<&mut Transform, (Without<NoteComponent>, Without<BassPick>, With<WorldCamera>, Without<Bassist>)>,
     mut string_query: Query<&mut Transform, (Without<NoteComponent>, Without<BassPick>, Without<WorldCamera>, Without<Bassist>, With<BassUI>)>,
     mut note_collision_event: EventReader<NoteCollision>,
-    _input: Res<Input<KeyCode>>,
+    asset_server: Res<AssetServer>,
     level_state: Res<State<LevelState>>,
     mut grid_coord_index: ResMut<CurrentJumpCoord>,
     grid_coords: Res<JumpCoords>,
-    _note_state: Res<State<NoteState>>,
     mut time: ResMut<LevelClock>,
 ) {
     time.0.unpause();
@@ -119,6 +119,9 @@ pub fn player_movement(
                 // position_x is for translating the dependents (i.e. camera and bass_ui)
                 position_x = jump_grid_xy.0 - character_transform.translation.x + 8.;
                 position_y = jump_grid_xy.1 + 8.;
+
+                spawn_exit_animation(&mut commands, &asset_server, jump_grid_xy.0 as f32 + 8., jump_grid_xy.1 as f32 + 8.);
+
                 if grid_coord_index.0 < grid_coords.0.len() - 1 {
                     grid_coord_index.0 += 1;
                 }
@@ -156,17 +159,3 @@ pub fn insert_beat_coords(
     commands.insert_resource(CurrentJumpCoord(1));
 }
 
-pub fn game_state_end(
-    camera_query: Query<&Transform, With<WorldCamera>>,
-    bassist_query: Query<&Transform, With<Bassist>>,
-    window_query: Query<&Window>,
-    mut change_game_state: ResMut<NextState<GameState>>,
-) {
-    let camera_transform = camera_query.single();
-    let bassist_transform = bassist_query.single();
-    let window = window_query.single();
-
-    if bassist_transform.translation.x >= camera_transform.translation.x + window.width() / 2 as f32 {
-        change_game_state.set(GameState::Ending);
-    }
-}

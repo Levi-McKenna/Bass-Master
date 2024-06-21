@@ -121,6 +121,21 @@ pub fn level_exit(
     change_level_state.set(LevelState::OutOfLevel);
 }
 
+pub fn game_state_end(
+    camera_query: Query<&Transform, With<WorldCamera>>,
+    bassist_query: Query<&Transform, With<Bassist>>,
+    window_query: Query<&Window>,
+    mut change_game_state: ResMut<NextState<GameState>>,
+) {
+    let camera_transform = camera_query.single();
+    let bassist_transform = bassist_query.single();
+    let window = window_query.single();
+
+    if bassist_transform.translation.x >= camera_transform.translation.x + window.width() / 2 as f32 {
+        change_game_state.set(GameState::Ending);
+    }
+}
+
 pub fn despawn_clock_time(
     mut commands: Commands,
 ) {

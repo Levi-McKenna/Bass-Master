@@ -8,7 +8,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
-use crate::{LevelState, LevelResource, LevelClock, CurrentBassNote};
+use crate::{LevelResource, LevelClock, CurrentBassNote};
 
 #[derive(Event)]
 pub struct NoteCollision {
@@ -416,35 +416,35 @@ pub fn manage_note_state(
     }
 } */
 
-pub fn spawn_count_in(
-    mut commands: Commands,
-) {
-    commands.spawn((
-        NodeBundle {
-            style: Style {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                position_type: PositionType::Absolute,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                ..default()
-            },
-            ..default()
-        },
-    )).with_children(|parent| {
-            parent.spawn((TextBundle {
-                text: Text::from_section(
-                    "1",
-                    TextStyle {
-                        font_size: 480.0,
-                        color: Color::rgba(1., 1., 1., 0.5),
-                        ..default()
-                    }
-                ),
-                ..default()
-            }.with_style(Style {
-                    ..default()   
-                }),
-                CountInUI));
-        });
-}
+// pub fn spawn_count_in(
+//     mut commands: Commands,
+// ) {
+//     commands.spawn((
+//         NodeBundle {
+//             style: Style {
+//                 width: Val::Percent(100.0),
+//                 height: Val::Percent(100.0),
+//                 position_type: PositionType::Absolute,
+//                 justify_content: JustifyContent::Center,
+//                 align_items: AlignItems::Center,
+//                 ..default()
+//             },
+//             ..default()
+//         },
+//     )).with_children(|parent| {
+//             parent.spawn((TextBundle {
+//                 text: Text::from_section(
+//                     "1",
+//                     TextStyle {
+//                         font_size: 480.0,
+//                         color: Color::rgba(1., 1., 1., 0.5),
+//                         ..default()
+//                     }
+//                 ),
+//                 ..default()
+//             }.with_style(Style {
+//                     ..default()   
+//                 }),
+//                 CountInUI));
+//         });
+// }

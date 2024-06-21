@@ -5,6 +5,7 @@ mod camera;
 mod bass;
 mod song;
 mod ui;
+mod animations;
 
 use bevy::prelude::*;
 use bevy_ecs_ldtk::prelude::*;
@@ -12,6 +13,7 @@ use bevy_asset_loader::prelude::*;
 use bevy::render::RenderPlugin;
 use bevy::render::settings::WgpuSettings;
 use bevy::render::settings::Backends;
+use bevy_aseprite::AsepritePlugin;
 use belly::prelude::*;
 use bevy::window::WindowMode;
 use bevy::winit::WinitWindows;
@@ -105,7 +107,7 @@ fn main() {
                 }),
                 ..default()
         }))
-        .add_plugins((LdtkPlugin, BellyPlugin))
+        .add_plugins((LdtkPlugin, BellyPlugin, AsepritePlugin))
         .insert_resource(LevelSelection::Index(0))
         .insert_resource(LevelScore(0))
         .insert_resource(CurrentBassNote {
@@ -163,8 +165,8 @@ fn main() {
         .add_systems(OnEnter(GameState::InGame), (level_start, unpause_game_clock))
         // run these systems before movement
         .add_systems(Update, (manage_level_states).before(player_movement).run_if(in_state(GameState::InGame)))
-        .add_systems(Update, (manage_level_states, player_movement, read_input_stream, print_if_true, write_note_collision).run_if(in_state(GameState::InGame)))
-        .add_systems(Update, (game_state_end, update_score, handle_level_camera_translations, translate_bass_notes, update_level_clock).run_if(in_state(GameState::InGame)))
+        .add_systems(Update, (game_state_end, read_input_stream, player_movement, print_if_true, write_note_collision).run_if(in_state(GameState::InGame)))
+        .add_systems(Update, (animations::toggle_portal_animation, update_score, handle_level_camera_translations, translate_bass_notes, update_level_clock).run_if(in_state(GameState::InGame)))
         .add_systems(OnExit(GameState::InGame), (pause_level_clock, pause_game_clock))
         // GameState::Paused 
         .add_systems(OnEnter(GameState::Paused), (draw_game_menu_ui, pause_song))
@@ -173,7 +175,7 @@ fn main() {
         // GameState::Ending
         .add_systems(OnEnter(GameState::Ending), (despawn_clock_time, despawn_world, despawn_character, despawn_bass_ui, despawn_music, reset_camera, level_exit, reset_score, despawn_score).before(load_main_menu))
         .add_systems(Update, (load_main_menu).run_if(in_state(GameState::Ending)))
-        .add_systems(Startup, (spawn_count_in, set_window_icon, setup, read_audiostream))
+        .add_systems(Startup, (set_window_icon, setup, read_audiostream))
         .add_systems(Update, state_inputs)
         .run();
 }
