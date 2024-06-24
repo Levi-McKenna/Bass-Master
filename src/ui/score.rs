@@ -16,6 +16,7 @@ pub fn spawn_score(
                 position_type: PositionType::Absolute,
                 justify_content: JustifyContent::End,
                 align_items: AlignItems::Start,
+                padding: UiRect::px(0., 15., 5., 0.),
                 ..default()
             },
             ..default()

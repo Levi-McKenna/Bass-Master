@@ -88,7 +88,7 @@ pub fn manage_level_states(
                 &LevelState::Introduction if character_transform.translation.x >= (camera_transform.translation.x) => 
                     change_level_state.set(LevelState::Playing),
                 // if camera is out of bounds of leve
-                &LevelState::Playing if (camera_transform.translation.x + (window.width() / 2.0) * scale_factor.0) >= level.px_wid as f32 =>  
+                &LevelState::Playing if (camera_transform.translation.x + (window.width() / 2.0) * scale_factor.0) >= level.px_wid as f32 - 16. =>  
                     change_level_state.set(LevelState::Ending),
                 // if nuthin
                 &_ => (),

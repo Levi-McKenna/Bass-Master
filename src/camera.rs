@@ -56,7 +56,7 @@ pub fn handle_level_camera_translations(
             let mut camera_transform = camera_query.single_mut();
 
             if level_state.get() == &LevelState::Ending {
-                camera_transform.translation.x = level.px_wid as f32 - (window.width() as f32 / 2.0) * scale_factor.0;
+                camera_transform.translation.x = (level.px_wid as f32 - 16.) - (window.width() as f32 / 2.0) * scale_factor.0;
             }
         }
     }       

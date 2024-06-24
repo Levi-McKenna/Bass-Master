@@ -164,9 +164,9 @@ fn main() {
         // InGame systems
         .add_systems(OnEnter(GameState::InGame), (level_start, unpause_game_clock))
         // run these systems before movement
-        .add_systems(Update, (manage_level_states).before(player_movement).run_if(in_state(GameState::InGame)))
+        .add_systems(Update, (manage_level_states).before(handle_level_camera_translations).run_if(in_state(GameState::InGame)))
         .add_systems(Update, (game_state_end, read_input_stream, player_movement, print_if_true, write_note_collision).run_if(in_state(GameState::InGame)))
-        .add_systems(Update, (animations::toggle_portal_animation, update_score, handle_level_camera_translations, translate_bass_notes, update_level_clock).run_if(in_state(GameState::InGame)))
+        .add_systems(Update, (animations::toggle_portal_animation, update_score, translate_bass_notes, update_level_clock).run_if(in_state(GameState::InGame)))
         .add_systems(OnExit(GameState::InGame), (pause_level_clock, pause_game_clock))
         // GameState::Paused 
         .add_systems(OnEnter(GameState::Paused), (draw_game_menu_ui, pause_song))

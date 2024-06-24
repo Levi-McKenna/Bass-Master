@@ -19,7 +19,7 @@ pub fn state_inputs(
 
 pub fn read_input_stream(
     mut input_events: EventWriter<BassInput>,
-    current_note: Res<CurrentBassNote>,
+    mut current_note: ResMut<CurrentBassNote>,
     receiver: Res<StreamReceiver>,
 ) {
     // hashmap containing chord to frequency corresponding values
@@ -98,6 +98,11 @@ pub fn read_input_stream(
         } else {
             input_events.send(BassInput(false));
         }
+
+        *current_note = CurrentBassNote {
+            chord: "".to_string(),
+            fret: -1,
+        };
     }
 }
 
@@ -107,9 +112,9 @@ pub fn print_if_true(
 ) {
     for events in correct_events.iter() {
         if events.0 {
-            score.0 += 200;
+            score.0 += 25;
         } else {
-            score.0 -= 50;
+            score.0 -= 10;
         }
         println!("Score -> {}", score.0);
     }

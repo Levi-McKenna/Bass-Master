@@ -47,7 +47,7 @@ pub fn read_audiostream(
                         }
                         consumer.clear();
                     } else {
-                        let _index_num = producer.push_slice(input);
+                        producer.push_slice(input);
                     }
                 },
                 err_fn,
